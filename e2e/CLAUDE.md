@@ -20,8 +20,9 @@ npm run test:ui   # Playwright UI モードで実行
 
 - **テストファイル**: `tests/*.spec.ts`
 - **設定**: `playwright.config.ts`
-- `webServer` でバックエンド (port 3000) とフロントエンド (port 5173) を自動起動
-- `reuseExistingServer: true` — 既に起動済みなら再利用
+- `webServer` でバックエンド (port 3000) とフロントエンド (port 5173) を自動起動し、テスト終了後に自動停止する
+- `reuseExistingServer: true` — 既に起動済みなら再利用（その場合はテスト後も停止しない）
+- フロントエンド (Vite) は起動ログを出さないため、ログに `[WebServer] Server running on http://localhost:3000` しか表示されなくても正常。テストが実行されていればフロントエンドも起動している
 
 ## テストファイル
 

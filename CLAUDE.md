@@ -6,35 +6,49 @@ Meetup community management full-stack application (Express.js + Prisma + SQLite
 
 ## Commands
 
+All commands run inside the Docker container. Helper scripts derive all paths dynamically from their location.
+
 ```bash
-# Root (monorepo)
-npm install              # Install all workspace dependencies
+# Alias for running commands inside the container
+alias d="./scripts/docker-dev.sh"
 
-# Backend (cd backend/)
-npm test                 # Run tests (vitest run)
-npm run test:coverage    # Run tests with coverage (80% threshold)
-npm run lint             # ESLint check
-npm run lint:fix         # ESLint auto-fix
-npm run format           # Prettier format
-npm run format:check     # Prettier check
-npm run dev              # Dev server (tsx watch, localhost:3000)
-npm run db:migrate       # Prisma migrate dev
-npm run db:push          # Prisma db push
+# Setup
+d up                     # Build + start container
+d install                # npm install + prisma + db:push + playwright browsers
 
-# Frontend (cd frontend/)
-npm test                 # Run tests (vitest run)
-npm run dev              # Dev server (Vite, localhost:5173)
-npm run lint             # ESLint check
-npm run build            # Production build
+# Development
+d dev                    # Start backend + frontend dev servers
+d shell                  # Enter container shell
 
-# E2E (cd e2e/)
-npm test                 # Run Playwright tests (requires backend + frontend running)
+# Testing
+d test                   # Run backend + frontend tests
+d e2e                    # Run Playwright E2E tests
 
-# Run a single backend test file
+# Cleanup
+d down                   # Stop + remove container (named volumes preserved)
+docker compose down -v   # Stop + remove container + named volumes (full clean)
+
+# Inside container shell (d shell)
+cd backend && npm run test:coverage    # Run tests with coverage (80% threshold)
+cd backend && npm run lint             # ESLint check
+cd backend && npm run lint:fix         # ESLint auto-fix
+cd backend && npm run format           # Prettier format
+cd backend && npm run format:check     # Prettier check
+cd backend && npm run db:migrate       # Prisma migrate dev
+cd frontend && npm run lint            # ESLint check
+cd frontend && npm run build           # Production build
+
+# Run a single test file (inside container shell)
 cd backend && npx vitest run src/auth/usecases/__tests__/register.usecase.test.ts
-
-# Run a single frontend test file
 cd frontend && npx vitest run src/pages/__tests__/LoginPage.test.tsx
+
+# Worktrees
+git worktree add ../meetup-sample-feature -b feature
+./scripts/docker-worktree.sh meetup-sample-feature install
+./scripts/docker-worktree.sh meetup-sample-feature test
+./scripts/docker-worktree.sh meetup-sample-feature shell
+git worktree remove ../meetup-sample-feature   # Cleanup worktree
+git branch -d feature                          # Delete branch (if merged)
 ```
 
 ## Architecture
@@ -119,7 +133,7 @@ Defined in tsconfig.json, resolved via `tsx` at runtime and `resolve.alias` in v
 
 ## Quality Gates
 
-Before completing any implementation:
+Before completing any implementation (run inside container shell):
 
 - `cd backend && npm run test:coverage` — All tests pass with coverage >= 80%
 - `cd backend && npm run lint` — No lint errors
