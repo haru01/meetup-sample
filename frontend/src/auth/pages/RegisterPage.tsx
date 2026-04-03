@@ -1,45 +1,48 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { Input } from '../components/Input'
-import { Button } from '../components/Button'
-import { Card } from '../components/Card'
+import { useState, type FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { Input } from "../../components/Input";
+import { Button } from "../../components/Button";
+import { Card } from "../../components/Card";
 
 export const RegisterPage = () => {
-  const { register } = useAuth()
-  const navigate = useNavigate()
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (!name || !email || !password) {
-      setError('すべてのフィールドを入力してください')
-      return
+      setError("すべてのフィールドを入力してください");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      await register(name, email, password)
-      navigate('/')
+      await register(name, email, password);
+      navigate("/");
     } catch {
-      setError('登録に失敗しました')
+      setError("登録に失敗しました");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <Card className="w-full max-w-md">
         <h1 className="mb-6 text-2xl font-bold">新規登録</h1>
         {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600" role="alert">
+          <div
+            className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -67,12 +70,12 @@ export const RegisterPage = () => {
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
-          すでにアカウントをお持ちの方は{' '}
+          すでにアカウントをお持ちの方は{" "}
           <Link to="/login" className="text-blue-600 hover:underline">
             ログイン
           </Link>
         </p>
       </Card>
     </div>
-  )
-}
+  );
+};

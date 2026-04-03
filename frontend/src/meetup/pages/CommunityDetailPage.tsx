@@ -1,52 +1,68 @@
-import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useCommunities } from '../hooks/useCommunities'
-import { useMembers } from '../hooks/useMembers'
-import { useAuth } from '../hooks/useAuth'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useCommunities } from "../hooks/useCommunities";
+import { useMembers } from "../hooks/useMembers";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
 
 export const CommunityDetailPage = () => {
-  const { id } = useParams<{ id: string }>()
-  const { community, loading: communityLoading, error: communityError, getCommunity } = useCommunities()
-  const { members, loading: membersLoading, error: membersError, listMembers, joinCommunity, leaveCommunity, approveMember, rejectMember } = useMembers()
-  const { user, isAuthenticated } = useAuth()
+  const { id } = useParams<{ id: string }>();
+  const {
+    community,
+    loading: communityLoading,
+    error: communityError,
+    getCommunity,
+  } = useCommunities();
+  const {
+    members,
+    loading: membersLoading,
+    error: membersError,
+    listMembers,
+    joinCommunity,
+    leaveCommunity,
+    approveMember,
+    rejectMember,
+  } = useMembers();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (id) {
-      getCommunity(id)
-      listMembers(id)
+      getCommunity(id);
+      listMembers(id);
     }
-  }, [id, getCommunity, listMembers])
+  }, [id, getCommunity, listMembers]);
 
-  if (communityLoading) return <p>読み込み中...</p>
-  if (communityError) return <p className="text-red-600">{communityError}</p>
-  if (!community) return <p>コミュニティが見つかりません</p>
+  if (communityLoading) return <p>読み込み中...</p>;
+  if (communityError) return <p className="text-red-600">{communityError}</p>;
+  if (!community) return <p>コミュニティが見つかりません</p>;
 
-  const isOwner = members.some((m) => m.accountId === user?.id && m.role === 'OWNER')
-  const currentMember = members.find((m) => m.accountId === user?.id)
+  const isOwner = members.some(
+    (m) => m.accountId === user?.id && m.role === "OWNER",
+  );
+  const currentMember = members.find((m) => m.accountId === user?.id);
 
   const handleJoin = async () => {
     if (id && user) {
-      const success = await joinCommunity(id, user.id)
-      if (success) listMembers(id)
+      const success = await joinCommunity(id, user.id);
+      if (success) listMembers(id);
     }
-  }
+  };
 
   const handleLeave = async () => {
     if (id && currentMember) {
-      const success = await leaveCommunity(id, currentMember.id)
-      if (success) listMembers(id)
+      const success = await leaveCommunity(id, currentMember.id);
+      if (success) listMembers(id);
     }
-  }
+  };
 
   const handleApprove = async (memberId: string) => {
-    if (id) await approveMember(id, memberId)
-  }
+    if (id) await approveMember(id, memberId);
+  };
 
   const handleReject = async (memberId: string) => {
-    if (id) await rejectMember(id, memberId)
-  }
+    if (id) await rejectMember(id, memberId);
+  };
 
   return (
     <div>
@@ -58,7 +74,7 @@ export const CommunityDetailPage = () => {
             {community.category}
           </span>
           <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-            {community.visibility === 'PUBLIC' ? '公開' : '非公開'}
+            {community.visibility === "PUBLIC" ? "公開" : "非公開"}
           </span>
         </div>
 
@@ -87,12 +103,18 @@ export const CommunityDetailPage = () => {
                 {member.role} / {member.status}
               </p>
             </div>
-            {isOwner && member.role !== 'OWNER' && (
+            {isOwner && member.role !== "OWNER" && (
               <div className="flex gap-2">
-                <Button variant="primary" onClick={() => handleApprove(member.id)}>
+                <Button
+                  variant="primary"
+                  onClick={() => handleApprove(member.id)}
+                >
                   承認
                 </Button>
-                <Button variant="danger" onClick={() => handleReject(member.id)}>
+                <Button
+                  variant="danger"
+                  onClick={() => handleReject(member.id)}
+                >
                   拒否
                 </Button>
               </div>
@@ -101,5 +123,5 @@ export const CommunityDetailPage = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};

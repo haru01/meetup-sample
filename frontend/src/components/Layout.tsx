@@ -1,13 +1,13 @@
-import { type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/hooks/useAuth";
 
 type LayoutProps = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,10 +23,16 @@ export const Layout = ({ children }: LayoutProps) => {
               </Link>
               {isAuthenticated && (
                 <>
-                  <Link to="/my-communities" className="text-gray-600 hover:text-gray-900">
+                  <Link
+                    to="/my-communities"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
                     マイコミュニティ
                   </Link>
-                  <Link to="/communities/new" className="text-gray-600 hover:text-gray-900">
+                  <Link
+                    to="/communities/new"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
                     コミュニティ作成
                   </Link>
                 </>
@@ -46,10 +52,16 @@ export const Layout = ({ children }: LayoutProps) => {
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/login"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
                   ログイン
                 </Link>
-                <Link to="/register" className="text-sm text-blue-600 hover:text-blue-800">
+                <Link
+                  to="/register"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
                   新規登録
                 </Link>
               </>
@@ -59,5 +71,5 @@ export const Layout = ({ children }: LayoutProps) => {
       </header>
       <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
     </div>
-  )
-}
+  );
+};

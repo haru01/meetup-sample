@@ -1,12 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
-import { Layout } from './components/Layout'
-import { LoginPage } from './pages/LoginPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { CommunityListPage } from './pages/CommunityListPage'
-import { CommunityDetailPage } from './pages/CommunityDetailPage'
-import { CommunityCreatePage } from './pages/CommunityCreatePage'
-import { MyCommunitiesPage } from './pages/MyCommunitiesPage'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./auth/contexts/AuthContext";
+import { Layout } from "./components/Layout";
+import { LoginPage } from "./auth/pages/LoginPage";
+import { RegisterPage } from "./auth/pages/RegisterPage";
+import { CommunityListPage } from "./meetup/pages/CommunityListPage";
+import { CommunityDetailPage } from "./meetup/pages/CommunityDetailPage";
+import { CommunityCreatePage } from "./meetup/pages/CommunityCreatePage";
+import { MyCommunitiesPage } from "./meetup/pages/MyCommunitiesPage";
 
 export function App() {
   return (
@@ -24,5 +24,5 @@ export function App() {
         </Layout>
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }

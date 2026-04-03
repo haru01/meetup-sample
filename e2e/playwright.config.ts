@@ -1,23 +1,23 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   timeout: 30000,
   use: {
-    baseURL: 'http://localhost:5174',
+    baseURL: "http://localhost:5173",
     headless: true,
   },
   webServer: [
     {
-      command: 'cd ../backend && npx tsx src/index.ts',
+      command: "cd ../backend && npx tsx src/index.ts",
       port: 3000,
       reuseExistingServer: true,
-      env: { DATABASE_URL: 'file:./dev.db', JWT_SECRET: 'test-secret' },
+      env: { DATABASE_URL: "file:./dev.db", JWT_SECRET: "test-secret" },
     },
     {
-      command: 'cd ../frontend && npm run dev',
-      port: 5174,
+      command: "cd ../frontend && npm run dev",
+      port: 5173,
       reuseExistingServer: true,
     },
   ],
-})
+});
