@@ -1,0 +1,13 @@
+// ============================================================
+// Auth Context
+// ============================================================
+
+model Account {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  members CommunityMember[]
+}
