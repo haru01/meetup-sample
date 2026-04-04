@@ -40,7 +40,7 @@ cd frontend && npm run build           # Production build
 
 # Run a single test file (inside container shell)
 cd backend && npx vitest run src/auth/usecases/__tests__/register.usecase.test.ts
-cd frontend && npx vitest run src/pages/__tests__/LoginPage.test.tsx
+cd frontend && npx vitest run src/auth/pages/__tests__/LoginPage.test.tsx
 
 # Worktrees
 git worktree add ../meetup-sample-feature -b feature
@@ -66,12 +66,11 @@ DDD bounded contexts with layered structure: `controllers/` -> `usecases/` -> `m
 
 ### Frontend
 
-React 19 + Vite + Tailwind CSS + React Router
+React 19 + Vite + Tailwind CSS + React Router — auth/meetup コンテキスト分離構成
 
-- `frontend/src/pages/` — Route page components
-- `frontend/src/components/` — Reusable UI components (Button, Input, Card, Layout)
-- `frontend/src/hooks/` — Custom hooks (useAuth, useCommunities, useMembers)
-- `frontend/src/contexts/` — React Context (AuthContext)
+- `frontend/src/auth/` — Authentication context (pages, hooks, contexts)
+- `frontend/src/meetup/` — Meetup context (pages, components, hooks, utils)
+- `frontend/src/components/` — Shared UI components (Button, Input, Card, ErrorAlert, Layout)
 - `frontend/src/lib/` — API client, token management, shared types
 
 ### E2E
@@ -119,7 +118,9 @@ Defined in tsconfig.json, resolved via `tsx` at runtime and `resolve.alias` in v
 
 ### Frontend
 - Component tests: `__tests__/*.test.tsx` using Vitest + React Testing Library
+- Pure function tests: `__tests__/*.test.ts` (e.g., `meetup/utils/__tests__/label-utils.test.ts`)
 - Hook tests: `__tests__/*.test.ts` using `renderHook` with mocked API client
+- Page tests are not used — component tests + pure function tests + E2E でカバー
 - JSDOM environment, `@testing-library/jest-dom/vitest` setup
 - Mock `apiClient` and `token` modules with `vi.mock`
 
@@ -133,13 +134,14 @@ Defined in tsconfig.json, resolved via `tsx` at runtime and `resolve.alias` in v
 
 ## Quality Gates
 
-Before completing any implementation (run inside container shell):
+Before completing any implementation (run from project root):
 
-- `cd backend && npm run test:coverage` — All tests pass with coverage >= 80%
-- `cd backend && npm run lint` — No lint errors
-- `cd backend && npm run review` — No critical issues (layer dependencies, circular deps, complexity, type check, coverage)
-- `cd frontend && npm test` — All frontend tests pass
-- `cd frontend && npm run lint` — No lint errors
+- `./scripts/docker-dev.sh test` — Backend + frontend tests
+- `cd backend && npm run test:coverage` — Tests with coverage >= 80% (inside container shell)
+- `cd backend && npm run lint` — No lint errors (inside container shell)
+- `cd backend && npm run review` — No critical issues (inside container shell)
+- `cd frontend && npm test` — All frontend tests pass (inside container shell)
+- `cd frontend && npm run lint` — No lint errors (inside container shell)
 
 ## Gotchas
 

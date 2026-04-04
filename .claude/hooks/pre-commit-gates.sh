@@ -1,5 +1,5 @@
 #!/bin/bash
-# PreToolUse hook: git commit 前に quality gates を実行
+# PreToolUse hook: git commit 前に quality gates を実行 (docker-dev.sh 経由)
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
@@ -8,30 +8,40 @@ if [[ ! "$COMMAND" =~ ^git\ commit ]]; then
   exit 0
 fi
 
-cd "$CLAUDE_PROJECT_DIR/backend" || exit 0
+SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
 
-# テスト実行
-TEST_OUTPUT=$(npx vitest run 2>&1)
-if [ $? -ne 0 ]; then
-  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "テストが失敗しています。commit 前に修正してください。"}}'
+# docker-dev.sh 存在チェック
+if [ ! -x "$SCRIPT" ]; then
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "scripts/docker-dev.sh が見つかりません。"}}'
   exit 0
 fi
 
-# lint チェック
-LINT_OUTPUT=$(npx eslint src 2>&1)
+# バックエンドテスト
+"$SCRIPT" bash -c "cd backend && npx vitest run" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
-  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "lint エラーがあります。commit 前に修正してください。"}}'
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "バックエンドテストが失敗しています。commit 前に修正してください。"}}'
   exit 0
 fi
 
-# dependency-cruiser チェック
-if [ -f ".dependency-cruiser.cjs" ]; then
-  DEP_OUTPUT=$(npx dependency-cruiser --config .dependency-cruiser.cjs --output-type json src/ 2>&1)
-  VIOLATIONS=$(echo "$DEP_OUTPUT" | jq -r '.summary.error // 0' 2>/dev/null)
-  if [ "$VIOLATIONS" != "0" ] && [ -n "$VIOLATIONS" ]; then
-    echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "依存関係ルール違反があります。commit 前に修正してください。"}}'
-    exit 0
-  fi
+# バックエンド lint
+"$SCRIPT" bash -c "cd backend && npx eslint src" 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "バックエンド lint エラーがあります。commit 前に修正してください。"}}'
+  exit 0
+fi
+
+# フロントエンドテスト
+"$SCRIPT" bash -c "cd frontend && npx vitest run" 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "フロントエンドテストが失敗しています。commit 前に修正してください。"}}'
+  exit 0
+fi
+
+# フロントエンド lint
+"$SCRIPT" bash -c "cd frontend && npx eslint src" 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "フロントエンド lint エラーがあります。commit 前に修正してください。"}}'
+  exit 0
 fi
 
 exit 0

@@ -1,33 +1,37 @@
 #!/bin/bash
-# Stop hook: 作業完了前にテストと lint が通ることを確認
-cd "$CLAUDE_PROJECT_DIR/backend" || exit 0
+# Stop hook: 作業完了前にテストと lint が通ることを確認 (docker-dev.sh 経由)
+SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
+
+# docker-dev.sh 存在チェック
+if [ ! -x "$SCRIPT" ]; then
+  echo '{"decision": "block", "reason": "scripts/docker-dev.sh が見つかりません。テストを実行できません。"}'
+  exit 0
+fi
 
 ERRORS=""
 
-# テスト実行
-TEST_OUTPUT=$(npx vitest run 2>&1)
+# バックエンドテスト
+"$SCRIPT" bash -c "cd backend && npx vitest run" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   ERRORS="$ERRORS\n- バックエンドテストが失敗しています"
 fi
 
-# lint チェック
-LINT_OUTPUT=$(npx eslint src 2>&1)
+# バックエンド lint
+"$SCRIPT" bash -c "cd backend && npx eslint src" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   ERRORS="$ERRORS\n- バックエンド lint エラーがあります"
 fi
 
 # フロントエンドテスト
-cd "$CLAUDE_PROJECT_DIR/frontend" 2>/dev/null
-if [ $? -eq 0 ]; then
-  FTEST_OUTPUT=$(npx vitest run 2>&1)
-  if [ $? -ne 0 ]; then
-    ERRORS="$ERRORS\n- フロントエンドテストが失敗しています"
-  fi
+"$SCRIPT" bash -c "cd frontend && npx vitest run" 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+  ERRORS="$ERRORS\n- フロントエンドテストが失敗しています"
+fi
 
-  FLINT_OUTPUT=$(npx eslint src 2>&1)
-  if [ $? -ne 0 ]; then
-    ERRORS="$ERRORS\n- フロントエンド lint エラーがあります"
-  fi
+# フロントエンド lint
+"$SCRIPT" bash -c "cd frontend && npx eslint src" 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+  ERRORS="$ERRORS\n- フロントエンド lint エラーがあります"
 fi
 
 if [ -n "$ERRORS" ]; then

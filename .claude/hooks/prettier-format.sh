@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostToolUse hook: Edit|Write された .ts ファイルを prettier で自動整形
+# PostToolUse hook: Edit|Write された .ts ファイルを prettier で自動整形 (Docker 経由)
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
@@ -10,8 +10,13 @@ fi
 
 # ファイルが存在する場合のみ実行
 if [ -f "$FILE" ]; then
-  cd "$CLAUDE_PROJECT_DIR/backend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR/frontend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR"
-  npx prettier --write "$FILE" 2>/dev/null || true
+  SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
+  if [ -x "$SCRIPT" ]; then
+    "$SCRIPT" bash -c "npx prettier --write '$FILE'" 2>/dev/null || true
+  else
+    cd "$CLAUDE_PROJECT_DIR/backend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR/frontend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR"
+    npx prettier --write "$FILE" 2>/dev/null || true
+  fi
 fi
 
 exit 0
