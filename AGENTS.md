@@ -4,7 +4,8 @@ Meetup community management full-stack application (Express.js + Prisma + SQLite
 
 ## Commands
 
-All commands run inside the Docker container. Helper scripts derive all paths dynamically from their location.
+**ホスト実行時**: すべてのコマンドは `./scripts/docker-dev.sh` 経由で Docker コンテナ内で実行する。
+**Docker 内実行時** (`/.dockerenv` が存在する場合): `docker-dev.sh` を使わず直接コマンドを実行する。
 
 ```bash
 # Alias for running commands inside the container
@@ -49,15 +50,41 @@ git worktree add ../meetup-sample-feature -b feature
 git worktree remove ../meetup-sample-feature   # Cleanup worktree
 git branch -d feature                          # Delete branch (if merged)
 
-# Docker 内 Claude Code
+# Docker 内 Claude Code（ホストから起動）
 d shell                  # コンテナに入る
 claude                   # Claude Code 起動（ANTHROPIC_API_KEY または ~/.claude 認証を使用）
+```
+
+### Docker 内で直接実行する場合（`/.dockerenv` 存在時）
+
+Docker コンテナ内で Claude Code を使う場合、`docker-dev.sh` は不要。直接コマンドを実行する。
+
+```bash
+# テスト
+cd backend && npm test
+cd frontend && npm test
+
+# Lint
+cd backend && npm run lint
+cd frontend && npm run lint
+
+# 型チェック
+cd backend && npx tsc --noEmit
+cd frontend && npx tsc --noEmit
+
+# Prisma
+cd backend && npx prisma generate
+cd backend && npm run db:push
+
+# 単一テストファイル
+cd backend && npx vitest run src/auth/usecases/__tests__/register.usecase.test.ts
 ```
 
 ## General Rules
 
 - 削除・リファクタリングを依頼された場合、指定されたファイル/ディレクトリのみを対象とする。関連ファイルや参照の削除は明示的に依頼されない限り行わない
-- docker compose を直接使わず、必ず `./scripts/docker-dev.sh` ラッパー経由でコマンドを実行する
+- **ホスト実行時**: docker compose を直接使わず、必ず `./scripts/docker-dev.sh` ラッパー経由でコマンドを実行する
+- **Docker 内実行時** (`/.dockerenv` が存在): `docker-dev.sh` は不要。`cd backend && npm test` のように直接実行する
 - シェルスクリプトは macOS/zsh 互換にする。GNU 固有フラグ (`grep -P`)、bash 固有機能 (連想配列)、`set -euo pipefail`（source されるスクリプト内）は使用禁止。POSIX 互換または zsh 互換の代替を使う
 
 ## Git Conventions
