@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useCommunities } from "../hooks/useCommunities";
-import { Card } from "../../components/Card";
+import { CommunityCard } from "../components/CommunityCard";
 
 export const MyCommunitiesPage = () => {
   const { communities, loading, error, getMyCommunities } = useCommunities();
@@ -23,14 +22,7 @@ export const MyCommunitiesPage = () => {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {communities.map((community) => (
-          <Link key={community.id} to={`/communities/${community.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
-              <h2 className="text-lg font-semibold">{community.name}</h2>
-              <p className="mt-1 text-sm text-gray-600">
-                {community.description}
-              </p>
-            </Card>
-          </Link>
+          <CommunityCard key={community.id} community={community} />
         ))}
       </div>
     </div>

@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useCommunities } from "../hooks/useCommunities";
-import { Card } from "../../components/Card";
+import { CommunityCard } from "../components/CommunityCard";
+import {
+  CATEGORIES,
+  getCategoryLabel,
+  filterCommunitiesByCategory,
+} from "../utils/label-utils";
 import type { Category } from "../types";
-
-const CATEGORIES: Category[] = ["TECH", "BUSINESS", "HOBBY"];
-
-const CATEGORY_LABELS: Record<Category, string> = {
-  TECH: "テクノロジー",
-  BUSINESS: "ビジネス",
-  HOBBY: "趣味",
-};
 
 export const CommunityListPage = () => {
   const { communities, loading, error, fetchCommunities } = useCommunities();
@@ -20,9 +16,7 @@ export const CommunityListPage = () => {
     fetchCommunities();
   }, [fetchCommunities]);
 
-  const filtered = categoryFilter
-    ? communities.filter((c) => c.category === categoryFilter)
-    : communities;
+  const filtered = filterCommunitiesByCategory(communities, categoryFilter);
 
   return (
     <div>
@@ -37,7 +31,7 @@ export const CommunityListPage = () => {
           <option value="">すべてのカテゴリ</option>
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
-              {CATEGORY_LABELS[cat]}
+              {getCategoryLabel(cat)}
             </option>
           ))}
         </select>
@@ -52,22 +46,7 @@ export const CommunityListPage = () => {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((community) => (
-          <Link key={community.id} to={`/communities/${community.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
-              <h2 className="text-lg font-semibold">{community.name}</h2>
-              <p className="mt-1 text-sm text-gray-600">
-                {community.description}
-              </p>
-              <div className="mt-3 flex gap-2">
-                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                  {CATEGORY_LABELS[community.category]}
-                </span>
-                <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                  {community.visibility === "PUBLIC" ? "公開" : "非公開"}
-                </span>
-              </div>
-            </Card>
-          </Link>
+          <CommunityCard key={community.id} community={community} showBadges />
         ))}
       </div>
     </div>

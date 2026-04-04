@@ -5,6 +5,9 @@ import { useMembers } from "../hooks/useMembers";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
+import { CategoryBadge } from "../components/CategoryBadge";
+import { VisibilityBadge } from "../components/VisibilityBadge";
+import { MemberCard } from "../components/MemberCard";
 
 export const CommunityDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,12 +73,8 @@ export const CommunityDetailPage = () => {
         <h1 className="text-2xl font-bold">{community.name}</h1>
         <p className="mt-2 text-gray-600">{community.description}</p>
         <div className="mt-4 flex gap-2">
-          <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-            {community.category}
-          </span>
-          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-            {community.visibility === "PUBLIC" ? "公開" : "非公開"}
-          </span>
+          <CategoryBadge category={community.category} />
+          <VisibilityBadge visibility={community.visibility} />
         </div>
 
         {isAuthenticated && !isOwner && !currentMember && (
@@ -96,30 +95,13 @@ export const CommunityDetailPage = () => {
 
       <div className="space-y-3">
         {members.map((member) => (
-          <Card key={member.id} className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">{member.accountId}</p>
-              <p className="text-sm text-gray-500">
-                {member.role} / {member.status}
-              </p>
-            </div>
-            {isOwner && member.role !== "OWNER" && (
-              <div className="flex gap-2">
-                <Button
-                  variant="primary"
-                  onClick={() => handleApprove(member.id)}
-                >
-                  承認
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => handleReject(member.id)}
-                >
-                  拒否
-                </Button>
-              </div>
-            )}
-          </Card>
+          <MemberCard
+            key={member.id}
+            member={member}
+            isOwner={isOwner}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
         ))}
       </div>
     </div>

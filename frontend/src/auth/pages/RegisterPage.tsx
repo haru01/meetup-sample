@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { ErrorAlert } from "../../components/ErrorAlert";
 
 export const RegisterPage = () => {
   const { register } = useAuth();
@@ -38,14 +39,7 @@ export const RegisterPage = () => {
     <div className="flex min-h-[60vh] items-center justify-center">
       <Card className="w-full max-w-md">
         <h1 className="mb-6 text-2xl font-bold">新規登録</h1>
-        {error && (
-          <div
-            className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600"
-            role="alert"
-          >
-            {error}
-          </div>
-        )}
+        <ErrorAlert message={error} />
         <form onSubmit={handleSubmit}>
           <Input
             label="名前"
