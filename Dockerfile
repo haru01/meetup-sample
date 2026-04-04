@@ -42,6 +42,9 @@ RUN mkdir -p $PLAYWRIGHT_BROWSERS_PATH \
 # Allow git to work with bind-mounted repos (different owner)
 RUN git config --system --add safe.directory '*'
 
+# Claude Code CLI (root でインストール、devuser から実行可能)
+RUN npm install -g @anthropic-ai/claude-code
+
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

@@ -48,6 +48,10 @@ git worktree add ../meetup-sample-feature -b feature
 ./scripts/docker-worktree.sh meetup-sample-feature shell
 git worktree remove ../meetup-sample-feature   # Cleanup worktree
 git branch -d feature                          # Delete branch (if merged)
+
+# Docker 内 Claude Code
+d shell                  # コンテナに入る
+claude                   # Claude Code 起動（ANTHROPIC_API_KEY または ~/.claude 認証を使用）
 ```
 
 ## General Rules

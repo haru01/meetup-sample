@@ -8,37 +8,37 @@ if [[ ! "$COMMAND" =~ ^git\ commit ]]; then
   exit 0
 fi
 
-SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
+RUN_CMD="$CLAUDE_PROJECT_DIR/.claude/hooks/run-cmd.sh"
 
-# docker-dev.sh 存在チェック
-if [ ! -x "$SCRIPT" ]; then
-  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "scripts/docker-dev.sh が見つかりません。"}}'
+# run-cmd.sh 存在チェック
+if [ ! -x "$RUN_CMD" ]; then
+  echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": ".claude/hooks/run-cmd.sh が見つかりません。"}}'
   exit 0
 fi
 
 # バックエンドテスト
-"$SCRIPT" bash -c "cd backend && npx vitest run" 2>&1 >/dev/null
+"$RUN_CMD" "cd backend && npx vitest run" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "バックエンドテストが失敗しています。commit 前に修正してください。"}}'
   exit 0
 fi
 
 # バックエンド lint
-"$SCRIPT" bash -c "cd backend && npx eslint src" 2>&1 >/dev/null
+"$RUN_CMD" "cd backend && npx eslint src" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "バックエンド lint エラーがあります。commit 前に修正してください。"}}'
   exit 0
 fi
 
 # フロントエンドテスト
-"$SCRIPT" bash -c "cd frontend && npx vitest run" 2>&1 >/dev/null
+"$RUN_CMD" "cd frontend && npx vitest run" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "フロントエンドテストが失敗しています。commit 前に修正してください。"}}'
   exit 0
 fi
 
 # フロントエンド lint
-"$SCRIPT" bash -c "cd frontend && npx eslint src" 2>&1 >/dev/null
+"$RUN_CMD" "cd frontend && npx eslint src" 2>&1 >/dev/null
 if [ $? -ne 0 ]; then
   echo '{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "フロントエンド lint エラーがあります。commit 前に修正してください。"}}'
   exit 0

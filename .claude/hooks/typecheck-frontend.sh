@@ -8,12 +8,12 @@ if [[ "$FILE" != *"frontend/"* ]]; then
   exit 0
 fi
 
-SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
-if [ ! -x "$SCRIPT" ]; then
+RUN_CMD="$CLAUDE_PROJECT_DIR/.claude/hooks/run-cmd.sh"
+if [ ! -x "$RUN_CMD" ]; then
   exit 0
 fi
 
-OUTPUT=$("$SCRIPT" bash -c "cd frontend && npx tsc --noEmit" 2>&1 | head -20)
+OUTPUT=$("$RUN_CMD" "cd frontend && npx tsc --noEmit" 2>&1 | head -20)
 if echo "$OUTPUT" | grep -q "error TS"; then
   echo "型チェックエラー:"
   echo "$OUTPUT"

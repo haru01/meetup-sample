@@ -16,6 +16,8 @@ services:
       - node_modules_e2e:${REPO_PARENT}/${PROJECT_DIR_NAME:-meetup-sample}/e2e/node_modules
       # Git config from host (read-only)
       - ~/.gitconfig:/home/devuser/.gitconfig:ro
+      # Claude Code auth from host (read-only)
+      - ~/.claude:/home/devuser/.claude:ro
     working_dir: ${REPO_PARENT}/${PROJECT_DIR_NAME:-meetup-sample}
     ports:
       - "3000:3000"
@@ -26,6 +28,7 @@ services:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
       - PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     tty: true
     stdin_open: true
 

@@ -10,9 +10,9 @@ fi
 
 # ファイルが存在する場合のみ実行
 if [ -f "$FILE" ]; then
-  SCRIPT="$CLAUDE_PROJECT_DIR/scripts/docker-dev.sh"
-  if [ -x "$SCRIPT" ]; then
-    "$SCRIPT" bash -c "npx prettier --write '$FILE'" 2>/dev/null || true
+  RUN_CMD="$CLAUDE_PROJECT_DIR/.claude/hooks/run-cmd.sh"
+  if [ -x "$RUN_CMD" ]; then
+    "$RUN_CMD" "npx prettier --write '$FILE'" 2>/dev/null || true
   else
     cd "$CLAUDE_PROJECT_DIR/backend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR/frontend" 2>/dev/null || cd "$CLAUDE_PROJECT_DIR"
     npx prettier --write "$FILE" 2>/dev/null || true
