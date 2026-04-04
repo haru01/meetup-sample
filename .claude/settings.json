@@ -79,6 +79,18 @@
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/layer-guard.sh\"",
             "timeout": 10,
             "statusMessage": "レイヤー依存チェック中..."
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/typecheck.sh\"",
+            "timeout": 30,
+            "statusMessage": "バックエンド型チェック中..."
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/typecheck-frontend.sh\"",
+            "timeout": 30,
+            "statusMessage": "フロントエンド型チェック中..."
           }
         ]
       }

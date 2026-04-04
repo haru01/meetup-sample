@@ -52,6 +52,17 @@ git worktree remove ../meetup-sample-feature   # Cleanup worktree
 git branch -d feature                          # Delete branch (if merged)
 ```
 
+## General Rules
+
+- 削除・リファクタリングを依頼された場合、指定されたファイル/ディレクトリのみを対象とする。関連ファイルや参照の削除は明示的に依頼されない限り行わない
+- docker compose を直接使わず、必ず `./scripts/docker-dev.sh` ラッパー経由でコマンドを実行する
+- シェルスクリプトは macOS/zsh 互換にする。GNU 固有フラグ (`grep -P`)、bash 固有機能 (連想配列)、`set -euo pipefail`（source されるスクリプト内）は使用禁止。POSIX 互換または zsh 互換の代替を使う
+
+## Git Conventions
+
+- コミットメッセージは日本語で記述し、Conventional Commits prefix を使用する
+- `/commit` スキルまたは `japanese-commit` スキルの形式に従う
+
 ## Architecture
 
 Monorepo with npm workspaces: `backend/`, `frontend/`, `e2e/`
