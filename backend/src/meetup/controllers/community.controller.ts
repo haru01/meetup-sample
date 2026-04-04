@@ -40,7 +40,7 @@ function toCommunityResponse(community: Community): Record<string, unknown> {
 export function createCommunityRouter(deps: CommunityDependencies): Router {
   const router = Router();
 
-  const { createCommunityUseCase, getCommunityUseCase, listCommunitiesUseCase } = deps;
+  const { createCommunityCommand, getCommunityQuery, listCommunitiesQuery } = deps;
 
   /**
    * POST /communities - コミュニティ作成
@@ -60,7 +60,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       updatedAt: now,
     };
 
-    const result = await createCommunityUseCase.execute(command);
+    const result = await createCommunityCommand.execute(command);
 
     if (!result.ok) {
       const { status, response } = mapCreateCommunityErrorToResponse(result.error);
@@ -96,7 +96,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       offset,
     };
 
-    const result = await listCommunitiesUseCase.execute(command);
+    const result = await listCommunitiesQuery.execute(command);
 
     if (!result.ok) {
       res.status(500).json({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
@@ -118,7 +118,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       requestingAccountId: req.accountId as AccountId | undefined,
     };
 
-    const result = await getCommunityUseCase.execute(command);
+    const result = await getCommunityQuery.execute(command);
 
     if (!result.ok) {
       const { status, response } = mapGetCommunityErrorToResponse(result.error);

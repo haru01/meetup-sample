@@ -1,15 +1,15 @@
 import { ok, err, type Result } from '@shared/result';
 import type { CommunityId } from '@shared/schemas/common';
-import type { CommunityMember } from '../models/community-member';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { ListMembersError } from '../errors/meetup-errors';
+import type { CommunityMember } from '../../models/community-member';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { ListMembersError } from '../../errors/meetup-errors';
 
 // ============================================================
 // メンバー一覧取得コマンド
 // ============================================================
 
-export interface ListMembersCommand {
+export interface ListMembersInput {
   readonly communityId: CommunityId;
   readonly limit: number;
   readonly offset: number;
@@ -29,13 +29,13 @@ export type ListMembersResult = {
  *
  * コミュニティのメンバー一覧をページネーションで返す。
  */
-export class ListMembersUseCase {
+export class ListMembersQuery {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository
   ) {}
 
-  async execute(command: ListMembersCommand): Promise<Result<ListMembersResult, ListMembersError>> {
+  async execute(command: ListMembersInput): Promise<Result<ListMembersResult, ListMembersError>> {
     // コミュニティ存在チェック
     const community = await this.communityRepository.findById(command.communityId);
     if (!community) {

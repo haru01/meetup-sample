@@ -24,6 +24,7 @@ export type CommunityMember = {
   readonly id: string;
   readonly communityId: string;
   readonly accountId: string;
+  readonly accountName: string | null;
   readonly role: Role;
   readonly status: MemberStatus;
   readonly createdAt: string;

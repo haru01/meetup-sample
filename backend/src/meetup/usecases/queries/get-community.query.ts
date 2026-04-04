@@ -1,15 +1,15 @@
 import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId } from '@shared/schemas/common';
-import type { Community } from '../models/community';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { GetCommunityError } from '../errors/meetup-errors';
+import type { Community } from '../../models/community';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { GetCommunityError } from '../../errors/meetup-errors';
 
 // ============================================================
 // コミュニティ取得コマンド
 // ============================================================
 
-export interface GetCommunityCommand {
+export interface GetCommunityInput {
   readonly communityId: CommunityId;
   readonly requestingAccountId?: AccountId;
 }
@@ -23,13 +23,13 @@ export interface GetCommunityCommand {
  *
  * PUBLIC は誰でも閲覧可能。PRIVATE はメンバーのみ閲覧可能。
  */
-export class GetCommunityUseCase {
+export class GetCommunityQuery {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository
   ) {}
 
-  async execute(command: GetCommunityCommand): Promise<Result<Community, GetCommunityError>> {
+  async execute(command: GetCommunityInput): Promise<Result<Community, GetCommunityError>> {
     const community = await this.communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });

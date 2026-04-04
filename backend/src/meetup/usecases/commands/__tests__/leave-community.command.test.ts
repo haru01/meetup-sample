@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LeaveCommunityUseCase } from '../leave-community.usecase';
-import type { CommunityRepository } from '../../repositories/community.repository';
-import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { Community } from '../../models/community';
-import type { CommunityMember } from '../../models/community-member';
+import { LeaveCommunityCommand } from '../leave-community.command';
+import type { CommunityRepository } from '../../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
+import type { Community } from '../../../models/community';
+import type { CommunityMember } from '../../../models/community-member';
 import { createCommunityId } from '@shared/schemas/id-factories';
 import { createCommunityMemberId } from '@shared/schemas/id-factories';
 import { createAccountId } from '@shared/schemas/id-factories';
@@ -63,15 +63,15 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 // テスト
 // ============================================================
 
-describe('LeaveCommunityUseCase', () => {
+describe('LeaveCommunityCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: LeaveCommunityUseCase;
+  let useCase: LeaveCommunityCommand;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new LeaveCommunityUseCase(communityRepo, memberRepo);
+    useCase = new LeaveCommunityCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {

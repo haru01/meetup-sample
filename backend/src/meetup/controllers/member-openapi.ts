@@ -18,9 +18,13 @@ const MemberResponseSchema = z
   })
   .openapi('MemberResponse');
 
+const MemberReadSchema = MemberResponseSchema.extend({
+  accountName: z.string().openapi({ description: 'アカウント名', example: '山田太郎' }),
+}).openapi('MemberRead');
+
 const MemberListResponseSchema = z
   .object({
-    members: z.array(MemberResponseSchema).openapi({ description: 'メンバー一覧' }),
+    members: z.array(MemberReadSchema).openapi({ description: 'メンバー一覧' }),
     total: z.number().int().openapi({ description: '総件数', example: 10 }),
   })
   .openapi('MemberListResponse');
@@ -30,6 +34,7 @@ const MemberListResponseSchema = z
 // ============================================================
 
 registry.register('MemberResponse', MemberResponseSchema);
+registry.register('MemberRead', MemberReadSchema);
 registry.register('MemberListResponse', MemberListResponseSchema);
 
 // ============================================================

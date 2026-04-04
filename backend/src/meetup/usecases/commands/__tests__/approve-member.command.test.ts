@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RejectMemberUseCase } from '../reject-member.usecase';
-import type { CommunityRepository } from '../../repositories/community.repository';
-import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { Community } from '../../models/community';
-import type { CommunityMember } from '../../models/community-member';
+import { ApproveMemberCommand } from '../approve-member.command';
+import type { CommunityRepository } from '../../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
+import type { Community } from '../../../models/community';
+import type { CommunityMember } from '../../../models/community-member';
 import { createCommunityId } from '@shared/schemas/id-factories';
 import { createCommunityMemberId } from '@shared/schemas/id-factories';
 import { createAccountId } from '@shared/schemas/id-factories';
@@ -23,6 +23,7 @@ const community: Community = {
 };
 
 const ownerAccountId = createAccountId('owner-account-1');
+const targetAccountId = createAccountId('target-account-1');
 const targetMemberId = createCommunityMemberId('target-member-1');
 
 const ownerMember: CommunityMember = {
@@ -46,9 +47,18 @@ const adminMember: CommunityMember = {
 const pendingMember: CommunityMember = {
   id: targetMemberId,
   communityId: community.id,
-  accountId: createAccountId('pending-account-1'),
+  accountId: targetAccountId,
   role: 'MEMBER',
   status: 'PENDING',
+  createdAt: new Date('2026-01-01T00:00:00Z'),
+};
+
+const activeMember: CommunityMember = {
+  id: targetMemberId,
+  communityId: community.id,
+  accountId: targetAccountId,
+  role: 'MEMBER',
+  status: 'ACTIVE',
   createdAt: new Date('2026-01-01T00:00:00Z'),
 };
 
@@ -81,19 +91,19 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 // テスト
 // ============================================================
 
-describe('RejectMemberUseCase', () => {
+describe('ApproveMemberCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: RejectMemberUseCase;
+  let useCase: ApproveMemberCommand;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new RejectMemberUseCase(communityRepo, memberRepo);
+    useCase = new ApproveMemberCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
-    it('OWNERがPENDINGメンバーを拒否するとメンバーレコードを削除する', async () => {
+    it('OWNERがPENDINGメンバーを承認するとACTIVEになる', async () => {
       const result = await useCase.execute({
         communityId: community.id,
         requesterAccountId: ownerAccountId,
@@ -101,10 +111,12 @@ describe('RejectMemberUseCase', () => {
       });
 
       expect(result.ok).toBe(true);
-      expect(memberRepo.delete).toHaveBeenCalledWith(targetMemberId);
+      if (result.ok) {
+        expect(result.value.status).toBe('ACTIVE');
+      }
     });
 
-    it('ADMINがPENDINGメンバーを拒否できる', async () => {
+    it('ADMINがPENDINGメンバーを承認できる', async () => {
       vi.mocked(memberRepo.findByIds).mockResolvedValue(adminMember);
 
       const result = await useCase.execute({
@@ -114,6 +126,16 @@ describe('RejectMemberUseCase', () => {
       });
 
       expect(result.ok).toBe(true);
+    });
+
+    it('承認したメンバーをリポジトリに保存する', async () => {
+      await useCase.execute({
+        communityId: community.id,
+        requesterAccountId: ownerAccountId,
+        targetMemberId,
+      });
+
+      expect(memberRepo.save).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -175,6 +197,21 @@ describe('RejectMemberUseCase', () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe('MemberNotFound');
+      }
+    });
+
+    it('すでにACTIVEなメンバーを承認するとMemberAlreadyActiveエラーを返す', async () => {
+      vi.mocked(memberRepo.findById).mockResolvedValue(activeMember);
+
+      const result = await useCase.execute({
+        communityId: community.id,
+        requesterAccountId: ownerAccountId,
+        targetMemberId,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('MemberAlreadyActive');
       }
     });
   });

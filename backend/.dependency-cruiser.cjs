@@ -89,15 +89,28 @@ module.exports = {
       },
     },
 
-    // node_modules の相対パスインポート禁止
+    // Command は PrismaClient に直接依存禁止（Repository を経由すること）
+    {
+      name: 'no-prisma-in-commands',
+      severity: 'error',
+      comment: 'Command は PrismaClient に直接依存できません。Repository を経由してください',
+      from: {
+        path: '/usecases/commands/',
+      },
+      to: {
+        path: '@prisma/client',
+      },
+    },
+
+    // ソースコードからの相対パスによる node_modules 参照を禁止
     {
       name: 'no-relative-node-modules',
       severity: 'error',
       comment: 'node_modules への相対パスインポートは禁止です',
       from: {},
       to: {
+        dependencyTypes: ['local'],
         path: 'node_modules',
-        pathNot: '^node_modules',
       },
     },
 
@@ -117,9 +130,6 @@ module.exports = {
 
   options: {
     doNotFollow: {
-      path: 'node_modules',
-    },
-    exclude: {
       path: 'node_modules',
     },
     tsPreCompilationDeps: true,

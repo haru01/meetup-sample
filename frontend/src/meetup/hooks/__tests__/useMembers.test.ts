@@ -29,6 +29,7 @@ describe("useMembers フック", () => {
         id: "m1",
         communityId: "c1",
         accountId: "a1",
+        accountName: "テストユーザー",
         role: "OWNER",
         status: "ACTIVE",
         createdAt: "",

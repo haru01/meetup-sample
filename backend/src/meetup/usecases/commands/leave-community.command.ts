@@ -1,15 +1,15 @@
 import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/common';
-import { leaveCommunity } from '../models/community-member';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { LeaveCommunityError } from '../errors/meetup-errors';
+import { leaveCommunity } from '../../models/community-member';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { LeaveCommunityError } from '../../errors/meetup-errors';
 
 // ============================================================
 // コミュニティ脱退コマンド
 // ============================================================
 
-export interface LeaveCommunityCommand {
+export interface LeaveCommunityInput {
   readonly communityId: CommunityId;
   readonly accountId: AccountId;
   /** メンバーID指定で脱退する場合（所有者確認を行う） */
@@ -26,13 +26,13 @@ export interface LeaveCommunityCommand {
  * メンバーをコミュニティから削除する。オーナーは脱退不可。
  * memberId が指定された場合、そのメンバーが accountId の所有であることを確認する。
  */
-export class LeaveCommunityUseCase {
+export class LeaveCommunityCommand {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository
   ) {}
 
-  async execute(command: LeaveCommunityCommand): Promise<Result<void, LeaveCommunityError>> {
+  async execute(command: LeaveCommunityInput): Promise<Result<void, LeaveCommunityError>> {
     // コミュニティ存在チェック
     const community = await this.communityRepository.findById(command.communityId);
     if (!community) {

@@ -1,11 +1,11 @@
 import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/common';
 import type { InMemoryEventBus } from '@shared/event-bus';
-import { createCommunity } from '../models/community';
-import type { CommunityCategory, CommunityVisibility } from '../models/schemas/community.schema';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { CreateCommunityError, CommunityCreatedEvent } from '../errors/meetup-errors';
+import { createCommunity } from '../../models/community';
+import type { CommunityCategory, CommunityVisibility } from '../../models/schemas/community.schema';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { CreateCommunityError, CommunityCreatedEvent } from '../../errors/meetup-errors';
 
 /** 1ユーザーあたりの最大コミュニティ作成数 */
 const MAX_COMMUNITIES_PER_USER = 10;
@@ -14,7 +14,7 @@ const MAX_COMMUNITIES_PER_USER = 10;
 // コミュニティ作成コマンド
 // ============================================================
 
-export interface CreateCommunityCommand {
+export interface CreateCommunityInput {
   readonly id: CommunityId;
   readonly ownerMemberId: CommunityMemberId;
   readonly accountId: AccountId;
@@ -27,8 +27,8 @@ export interface CreateCommunityCommand {
 }
 
 export type CreateCommunityResult = {
-  readonly community: import('../models/community').Community;
-  readonly ownerMember: import('../models/community-member').CommunityMember;
+  readonly community: import('../../models/community').Community;
+  readonly ownerMember: import('../../models/community-member').CommunityMember;
 };
 
 // ============================================================
@@ -40,7 +40,7 @@ export type CreateCommunityResult = {
  *
  * 名前重複チェック・上限チェック後、コミュニティを作成しイベントを発行する。
  */
-export class CreateCommunityUseCase {
+export class CreateCommunityCommand {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository,
@@ -48,7 +48,7 @@ export class CreateCommunityUseCase {
   ) {}
 
   async execute(
-    command: CreateCommunityCommand
+    command: CreateCommunityInput
   ): Promise<Result<CreateCommunityResult, CreateCommunityError>> {
     // 名前重複チェック
     const existing = await this.communityRepository.findByName(command.name);

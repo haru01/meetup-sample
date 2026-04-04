@@ -1,15 +1,15 @@
 import { ok, type Result } from '@shared/result';
 import type { AccountId } from '@shared/schemas/common';
-import type { Community } from '../models/community';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityVisibility } from '../models/schemas/community.schema';
-import type { ListCommunitiesError } from '../errors/meetup-errors';
+import type { Community } from '../../models/community';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityVisibility } from '../../models/schemas/community.schema';
+import type { ListCommunitiesError } from '../../errors/meetup-errors';
 
 // ============================================================
 // コミュニティ一覧取得コマンド
 // ============================================================
 
-export interface ListCommunitiesCommand {
+export interface ListCommunitiesInput {
   readonly category?: string;
   readonly memberAccountId?: AccountId;
   readonly limit: number;
@@ -31,11 +31,11 @@ export type ListCommunitiesResult = {
  * memberAccountId 指定時はそのユーザーが所属するコミュニティ一覧を返す。
  * 未指定時は PUBLIC コミュニティのみを返す。
  */
-export class ListCommunitiesUseCase {
+export class ListCommunitiesQuery {
   constructor(private readonly communityRepository: CommunityRepository) {}
 
   async execute(
-    command: ListCommunitiesCommand
+    command: ListCommunitiesInput
   ): Promise<Result<ListCommunitiesResult, ListCommunitiesError>> {
     const visibility: CommunityVisibility | undefined = command.memberAccountId
       ? undefined

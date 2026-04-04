@@ -42,11 +42,11 @@ export function createMemberRouter(deps: MemberDependencies): Router {
   const router = Router({ mergeParams: true });
 
   const {
-    joinCommunityUseCase,
-    leaveCommunityUseCase,
-    listMembersUseCase,
-    approveMemberUseCase,
-    rejectMemberUseCase,
+    joinCommunityCommand,
+    leaveCommunityCommand,
+    approveMemberCommand,
+    rejectMemberCommand,
+    listMembersReadQuery,
   } = deps;
 
   /**
@@ -57,7 +57,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const accountId = req.accountId as AccountId;
     const memberId = createCommunityMemberId();
 
-    const result = await joinCommunityUseCase.execute({
+    const result = await joinCommunityCommand.execute({
       communityId,
       accountId,
       memberId,
@@ -79,7 +79,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const communityId = req.params['id'] as CommunityId;
     const accountId = req.accountId as AccountId;
 
-    const result = await leaveCommunityUseCase.execute({
+    const result = await leaveCommunityCommand.execute({
       communityId,
       accountId,
     });
@@ -101,7 +101,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const memberId = req.params['memberId'] as CommunityMemberId;
     const accountId = req.accountId as AccountId;
 
-    const result = await leaveCommunityUseCase.execute({
+    const result = await leaveCommunityCommand.execute({
       communityId,
       accountId,
       memberId,
@@ -117,18 +117,14 @@ export function createMemberRouter(deps: MemberDependencies): Router {
   });
 
   /**
-   * GET /communities/:id/members — メンバー一覧
+   * GET /communities/:id/members — メンバー一覧（Read モデル）
    */
   router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> => {
     const communityId = req.params['id'] as CommunityId;
     const limit = parseInt((req.query['limit'] as string | undefined) ?? '20', 10);
     const offset = parseInt((req.query['offset'] as string | undefined) ?? '0', 10);
 
-    const result = await listMembersUseCase.execute({
-      communityId,
-      limit,
-      offset,
-    });
+    const result = await listMembersReadQuery.execute({ communityId, limit, offset });
 
     if (!result.ok) {
       const { status, response } = mapListMembersErrorToResponse(result.error);
@@ -137,7 +133,15 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     }
 
     res.status(200).json({
-      members: result.value.members.map(toMemberResponse),
+      members: result.value.members.map((m) => ({
+        id: m.id,
+        communityId: m.communityId,
+        accountId: m.accountId,
+        accountName: m.accountName,
+        role: m.role,
+        status: m.status,
+        createdAt: m.createdAt.toISOString(),
+      })),
       total: result.value.total,
     });
   });
@@ -153,7 +157,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
       const requesterAccountId = req.accountId as AccountId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
-      const result = await approveMemberUseCase.execute({
+      const result = await approveMemberCommand.execute({
         communityId,
         requesterAccountId,
         targetMemberId,
@@ -180,7 +184,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
       const requesterAccountId = req.accountId as AccountId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
-      const result = await rejectMemberUseCase.execute({
+      const result = await rejectMemberCommand.execute({
         communityId,
         requesterAccountId,
         targetMemberId,

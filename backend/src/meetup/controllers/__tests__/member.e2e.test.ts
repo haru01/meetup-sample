@@ -254,6 +254,10 @@ describe('GET /communities/:id/members — メンバー一覧取得', () => {
       // オーナーとメンバーの2人
       expect(res.body.total).toBe(2);
       expect(res.body.members.length).toBe(2);
+      // Read モデルで accountName が返ること
+      const names = res.body.members.map((m: { accountName: string }) => m.accountName);
+      expect(names).toContain('オーナー6');
+      expect(names).toContain('メンバー6');
     });
   });
 

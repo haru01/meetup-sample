@@ -2,14 +2,15 @@ import type { PrismaClient } from '@prisma/client';
 import { PrismaCommunityRepository } from './repositories/prisma-community.repository';
 import { PrismaCommunityMemberRepository } from './repositories/prisma-community-member.repository';
 import { InMemoryEventBus } from '@shared/event-bus';
-import { CreateCommunityUseCase } from './usecases/create-community.usecase';
-import { GetCommunityUseCase } from './usecases/get-community.usecase';
-import { ListCommunitiesUseCase } from './usecases/list-communities.usecase';
-import { JoinCommunityUseCase } from './usecases/join-community.usecase';
-import { LeaveCommunityUseCase } from './usecases/leave-community.usecase';
-import { ListMembersUseCase } from './usecases/list-members.usecase';
-import { ApproveMemberUseCase } from './usecases/approve-member.usecase';
-import { RejectMemberUseCase } from './usecases/reject-member.usecase';
+import { CreateCommunityCommand } from './usecases/commands/create-community.command';
+import { JoinCommunityCommand } from './usecases/commands/join-community.command';
+import { LeaveCommunityCommand } from './usecases/commands/leave-community.command';
+import { ApproveMemberCommand } from './usecases/commands/approve-member.command';
+import { RejectMemberCommand } from './usecases/commands/reject-member.command';
+import { GetCommunityQuery } from './usecases/queries/get-community.query';
+import { ListCommunitiesQuery } from './usecases/queries/list-communities.query';
+import { ListMembersQuery } from './usecases/queries/list-members.query';
+import { ListMembersReadQuery } from './usecases/queries/list-members-read.query';
 import type { CommunityCreatedEvent } from './errors/meetup-errors';
 
 // ============================================================
@@ -17,17 +18,18 @@ import type { CommunityCreatedEvent } from './errors/meetup-errors';
 // ============================================================
 
 export interface CommunityDependencies {
-  readonly createCommunityUseCase: CreateCommunityUseCase;
-  readonly getCommunityUseCase: GetCommunityUseCase;
-  readonly listCommunitiesUseCase: ListCommunitiesUseCase;
+  readonly createCommunityCommand: CreateCommunityCommand;
+  readonly getCommunityQuery: GetCommunityQuery;
+  readonly listCommunitiesQuery: ListCommunitiesQuery;
 }
 
 export interface MemberDependencies {
-  readonly joinCommunityUseCase: JoinCommunityUseCase;
-  readonly leaveCommunityUseCase: LeaveCommunityUseCase;
-  readonly listMembersUseCase: ListMembersUseCase;
-  readonly approveMemberUseCase: ApproveMemberUseCase;
-  readonly rejectMemberUseCase: RejectMemberUseCase;
+  readonly joinCommunityCommand: JoinCommunityCommand;
+  readonly leaveCommunityCommand: LeaveCommunityCommand;
+  readonly listMembersQuery: ListMembersQuery;
+  readonly approveMemberCommand: ApproveMemberCommand;
+  readonly rejectMemberCommand: RejectMemberCommand;
+  readonly listMembersReadQuery: ListMembersReadQuery;
 }
 
 /**
@@ -43,26 +45,30 @@ export function createMeetupDependencies(prisma: PrismaClient): {
 
   return {
     community: {
-      createCommunityUseCase: new CreateCommunityUseCase(
+      createCommunityCommand: new CreateCommunityCommand(
         communityRepository,
         communityMemberRepository,
         eventBus
       ),
-      getCommunityUseCase: new GetCommunityUseCase(communityRepository, communityMemberRepository),
-      listCommunitiesUseCase: new ListCommunitiesUseCase(communityRepository),
+      getCommunityQuery: new GetCommunityQuery(communityRepository, communityMemberRepository),
+      listCommunitiesQuery: new ListCommunitiesQuery(communityRepository),
     },
     member: {
-      joinCommunityUseCase: new JoinCommunityUseCase(communityRepository, communityMemberRepository),
-      leaveCommunityUseCase: new LeaveCommunityUseCase(
+      joinCommunityCommand: new JoinCommunityCommand(
         communityRepository,
         communityMemberRepository
       ),
-      listMembersUseCase: new ListMembersUseCase(communityRepository, communityMemberRepository),
-      approveMemberUseCase: new ApproveMemberUseCase(
+      leaveCommunityCommand: new LeaveCommunityCommand(
         communityRepository,
         communityMemberRepository
       ),
-      rejectMemberUseCase: new RejectMemberUseCase(communityRepository, communityMemberRepository),
+      listMembersQuery: new ListMembersQuery(communityRepository, communityMemberRepository),
+      approveMemberCommand: new ApproveMemberCommand(
+        communityRepository,
+        communityMemberRepository
+      ),
+      rejectMemberCommand: new RejectMemberCommand(communityRepository, communityMemberRepository),
+      listMembersReadQuery: new ListMembersReadQuery(prisma),
     },
   };
 }

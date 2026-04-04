@@ -151,6 +151,6 @@ describe("useCommunities フック", () => {
     });
 
     expect(result.current.communities).toEqual(communities);
-    expect(mockGet).toHaveBeenCalledWith("/communities/me");
+    expect(mockGet).toHaveBeenCalledWith("/communities?member=me");
   });
 });

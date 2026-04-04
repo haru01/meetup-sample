@@ -1,37 +1,41 @@
 import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/common';
-import { CommunityMemberRole } from '../models/schemas/member.schema';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { RejectMemberError } from '../errors/meetup-errors';
+import type { CommunityMember } from '../../models/community-member';
+import { approveMember } from '../../models/community-member';
+import { CommunityMemberRole } from '../../models/schemas/member.schema';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { ApproveMemberError } from '../../errors/meetup-errors';
 
 // ============================================================
-// メンバー拒否コマンド
+// メンバー承認コマンド
 // ============================================================
 
-export interface RejectMemberCommand {
+export interface ApproveMemberInput {
   readonly communityId: CommunityId;
   readonly requesterAccountId: AccountId;
   readonly targetMemberId: CommunityMemberId;
 }
 
 // ============================================================
-// メンバー拒否ユースケース
+// メンバー承認ユースケース
 // ============================================================
 
 /**
- * メンバー拒否ユースケース
+ * メンバー承認ユースケース
  *
- * OWNER または ADMIN のみがメンバーを拒否できる。
- * メンバーレコードを削除する。
+ * OWNER または ADMIN のみがメンバーを承認できる。
+ * PENDING → ACTIVE に遷移する。
  */
-export class RejectMemberUseCase {
+export class ApproveMemberCommand {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository
   ) {}
 
-  async execute(command: RejectMemberCommand): Promise<Result<void, RejectMemberError>> {
+  async execute(
+    command: ApproveMemberInput
+  ): Promise<Result<CommunityMember, ApproveMemberError>> {
     // コミュニティ存在チェック
     const community = await this.communityRepository.findById(command.communityId);
     if (!community) {
@@ -44,7 +48,7 @@ export class RejectMemberUseCase {
       command.requesterAccountId
     );
 
-    // OWNER または ADMIN のみ拒否可能
+    // OWNER または ADMIN のみ承認可能
     if (
       !requester ||
       (requester.role !== CommunityMemberRole.OWNER && requester.role !== CommunityMemberRole.ADMIN)
@@ -58,9 +62,15 @@ export class RejectMemberUseCase {
       return err({ type: 'MemberNotFound' });
     }
 
-    // メンバーレコードを削除
-    await this.communityMemberRepository.delete(targetMember.id);
+    // ドメインモデルで承認（PENDING → ACTIVE）
+    const approveResult = approveMember(targetMember);
+    if (!approveResult.ok) {
+      return approveResult;
+    }
 
-    return ok(undefined);
+    // 保存
+    await this.communityMemberRepository.save(approveResult.value);
+
+    return ok(approveResult.value);
   }
 }

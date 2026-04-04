@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CreateCommunityUseCase } from '../create-community.usecase';
-import type { CreateCommunityCommand } from '../create-community.usecase';
-import type { CommunityRepository } from '../../repositories/community.repository';
-import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import { CreateCommunityCommand } from '../create-community.command';
+import type { CreateCommunityInput } from '../create-community.command';
+import type { CommunityRepository } from '../../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import { InMemoryEventBus } from '@shared/event-bus';
-import type { CommunityCreatedEvent } from '../../errors/meetup-errors';
+import type { CommunityCreatedEvent } from '../../../errors/meetup-errors';
 import { createCommunityId } from '@shared/schemas/id-factories';
 import { createCommunityMemberId } from '@shared/schemas/id-factories';
 import { createAccountId } from '@shared/schemas/id-factories';
@@ -13,7 +13,7 @@ import { createAccountId } from '@shared/schemas/id-factories';
 // テスト用フィクスチャ
 // ============================================================
 
-const makeCommand = (): CreateCommunityCommand => ({
+const makeCommand = (): CreateCommunityInput => ({
   accountId: createAccountId('account-1'),
   name: 'テストコミュニティ',
   description: 'テスト用コミュニティです',
@@ -45,17 +45,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 // テスト
 // ============================================================
 
-describe('CreateCommunityUseCase', () => {
+describe('CreateCommunityCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
   let eventBus: InMemoryEventBus<CommunityCreatedEvent>;
-  let useCase: CreateCommunityUseCase;
+  let useCase: CreateCommunityCommand;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
     eventBus = new InMemoryEventBus<CommunityCreatedEvent>();
-    useCase = new CreateCommunityUseCase(communityRepo, memberRepo, eventBus);
+    useCase = new CreateCommunityCommand(communityRepo, memberRepo, eventBus);
   });
 
   describe('正常系', () => {

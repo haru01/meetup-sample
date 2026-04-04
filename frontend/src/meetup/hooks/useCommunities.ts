@@ -59,8 +59,9 @@ export const useCommunities = () => {
   const getMyCommunities = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result =
-      await apiClient.get<ListCommunitiesResponse>("/communities/me");
+    const result = await apiClient.get<ListCommunitiesResponse>(
+      "/communities?member=me",
+    );
     if (result.ok) {
       setCommunities(result.data.communities);
     } else {

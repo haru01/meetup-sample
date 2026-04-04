@@ -1,16 +1,16 @@
 import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/common';
-import type { CommunityMember } from '../models/community-member';
-import { joinCommunity } from '../models/community-member';
-import type { CommunityRepository } from '../repositories/community.repository';
-import type { CommunityMemberRepository } from '../repositories/community-member.repository';
-import type { JoinCommunityError } from '../errors/meetup-errors';
+import type { CommunityMember } from '../../models/community-member';
+import { joinCommunity } from '../../models/community-member';
+import type { CommunityRepository } from '../../repositories/community.repository';
+import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
+import type { JoinCommunityError } from '../../errors/meetup-errors';
 
 // ============================================================
 // コミュニティ参加コマンド
 // ============================================================
 
-export interface JoinCommunityCommand {
+export interface JoinCommunityInput {
   readonly communityId: CommunityId;
   readonly accountId: AccountId;
   readonly memberId: CommunityMemberId;
@@ -25,14 +25,14 @@ export interface JoinCommunityCommand {
  *
  * PUBLIC → ACTIVE、PRIVATE → PENDING でメンバーを追加する。
  */
-export class JoinCommunityUseCase {
+export class JoinCommunityCommand {
   constructor(
     private readonly communityRepository: CommunityRepository,
     private readonly communityMemberRepository: CommunityMemberRepository
   ) {}
 
   async execute(
-    command: JoinCommunityCommand
+    command: JoinCommunityInput
   ): Promise<Result<CommunityMember, JoinCommunityError>> {
     // コミュニティ存在チェック
     const community = await this.communityRepository.findById(command.communityId);

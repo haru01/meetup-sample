@@ -17,7 +17,7 @@ export const MemberCard = ({
 }: MemberCardProps) => (
   <Card className="flex items-center justify-between">
     <div>
-      <p className="font-medium">{member.accountId}</p>
+      <p className="font-medium">{member.accountName ?? member.accountId}</p>
       <p className="text-sm text-gray-500">
         {member.role} / {member.status}
       </p>

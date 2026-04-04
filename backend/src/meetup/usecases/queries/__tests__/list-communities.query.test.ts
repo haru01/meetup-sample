@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ListCommunitiesUseCase } from '../list-communities.usecase';
-import type { CommunityRepository } from '../../repositories/community.repository';
-import type { Community } from '../../models/community';
+import { ListCommunitiesQuery } from '../list-communities.query';
+import type { CommunityRepository } from '../../../repositories/community.repository';
+import type { Community } from '../../../models/community';
 import { createCommunityId } from '@shared/schemas/id-factories';
 import { createAccountId } from '@shared/schemas/id-factories';
 
@@ -31,13 +31,13 @@ const makeCommunityRepository = (): CommunityRepository => ({
 // テスト
 // ============================================================
 
-describe('ListCommunitiesUseCase', () => {
+describe('ListCommunitiesQuery', () => {
   let communityRepo: CommunityRepository;
-  let useCase: ListCommunitiesUseCase;
+  let useCase: ListCommunitiesQuery;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
-    useCase = new ListCommunitiesUseCase(communityRepo);
+    useCase = new ListCommunitiesQuery(communityRepo);
   });
 
   describe('正常系', () => {

@@ -8,6 +8,7 @@ const baseMember: CommunityMember = {
   id: "m1",
   communityId: "c1",
   accountId: "user-123",
+  accountName: "テストユーザー",
   role: "MEMBER",
   status: "ACTIVE",
   createdAt: "2024-01-01",
@@ -17,11 +18,12 @@ const ownerMember: CommunityMember = {
   ...baseMember,
   id: "m2",
   accountId: "owner-456",
+  accountName: "オーナーユーザー",
   role: "OWNER",
 };
 
 describe("MemberCard コンポーネント", () => {
-  it("メンバーのアカウントIDとロール・ステータスを表示する", () => {
+  it("メンバーのアカウント名とロール・ステータスを表示する", () => {
     render(
       <MemberCard
         member={baseMember}
@@ -30,8 +32,24 @@ describe("MemberCard コンポーネント", () => {
         onReject={vi.fn()}
       />,
     );
-    expect(screen.getByText("user-123")).toBeInTheDocument();
+    expect(screen.getByText("テストユーザー")).toBeInTheDocument();
     expect(screen.getByText("MEMBER / ACTIVE")).toBeInTheDocument();
+  });
+
+  it("accountName が null の場合、accountId をフォールバック表示する", () => {
+    const memberWithoutName: CommunityMember = {
+      ...baseMember,
+      accountName: null,
+    };
+    render(
+      <MemberCard
+        member={memberWithoutName}
+        isOwner={false}
+        onApprove={vi.fn()}
+        onReject={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("user-123")).toBeInTheDocument();
   });
 
   it("isOwner が false の場合、承認・拒否ボタンを表示しない", () => {
