@@ -28,19 +28,20 @@ d e2e                    # Run Playwright E2E tests
 d down                   # Stop + remove container (named volumes preserved)
 docker compose down -v   # Stop + remove container + named volumes (full clean)
 
-# Inside container shell (d shell)
-cd backend && npm run test:coverage    # Run tests with coverage (80% threshold)
-cd backend && npm run lint             # ESLint check
-cd backend && npm run lint:fix         # ESLint auto-fix
-cd backend && npm run format           # Prettier format
-cd backend && npm run format:check     # Prettier check
-cd backend && npm run db:migrate       # Prisma migrate dev
-cd frontend && npm run lint            # ESLint check
-cd frontend && npm run build           # Production build
+# Arbitrary command (catch-all: d <command> runs inside container)
+d bash -c "cd backend && npm run lint"             # ESLint check
+d bash -c "cd backend && npm run lint:fix"         # ESLint auto-fix
+d bash -c "cd backend && npm run test:coverage"    # Tests with coverage (80% threshold)
+d bash -c "cd backend && npm run review"           # Layer deps, circular deps, complexity, type check, coverage
+d bash -c "cd backend && npm run format"           # Prettier format
+d bash -c "cd backend && npm run format:check"     # Prettier check
+d bash -c "cd backend && npm run db:migrate"       # Prisma migrate dev
+d bash -c "cd frontend && npm run lint"            # ESLint check
+d bash -c "cd frontend && npm run build"           # Production build
 
-# Run a single test file (inside container shell)
-cd backend && npx vitest run src/auth/usecases/__tests__/register.usecase.test.ts
-cd frontend && npx vitest run src/auth/pages/__tests__/LoginPage.test.tsx
+# Run a single test file
+d bash -c "cd backend && npx vitest run src/auth/usecases/__tests__/register.usecase.test.ts"
+d bash -c "cd frontend && npx vitest run src/auth/pages/__tests__/LoginPage.test.tsx"
 
 # Worktrees
 git worktree add ../meetup-sample-feature -b feature
@@ -134,14 +135,14 @@ Defined in tsconfig.json, resolved via `tsx` at runtime and `resolve.alias` in v
 
 ## Quality Gates
 
-Before completing any implementation (run from project root):
+Before completing any implementation (run from project root, `alias d="./scripts/docker-dev.sh"`):
 
-- `./scripts/docker-dev.sh test` — Backend + frontend tests
-- `cd backend && npm run test:coverage` — Tests with coverage >= 80% (inside container shell)
-- `cd backend && npm run lint` — No lint errors (inside container shell)
-- `cd backend && npm run review` — No critical issues (inside container shell)
-- `cd frontend && npm test` — All frontend tests pass (inside container shell)
-- `cd frontend && npm run lint` — No lint errors (inside container shell)
+- `d test` — Backend + frontend tests
+- `d bash -c "cd backend && npm run test:coverage"` — Tests with coverage >= 80%
+- `d bash -c "cd backend && npm run lint"` — No lint errors
+- `d bash -c "cd backend && npm run review"` — No critical issues (layer deps, circular deps, complexity, type check, coverage)
+- `d bash -c "cd frontend && npm test"` — All frontend tests pass
+- `d bash -c "cd frontend && npm run lint"` — No lint errors
 
 ## Gotchas
 
