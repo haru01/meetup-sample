@@ -7,14 +7,14 @@ import { createOpenApiValidatorMiddleware } from '@shared/middleware/openapi-val
 import { errorHandlerMiddleware } from '@shared/middleware/error-handler.middleware';
 import { prisma as defaultPrisma } from './infrastructure/prisma';
 import { createAuthRouter } from './auth/controllers/auth.controller';
-import { createCommunityRouter } from './meetup/controllers/community.controller';
-import { createMemberRouter } from './meetup/controllers/member.controller';
+import { createCommunityRouter } from './community/controllers/community.controller';
+import { createMemberRouter } from './community/controllers/member.controller';
 import { createAuthDependencies } from './auth/composition';
-import { createMeetupDependencies } from './meetup/composition';
+import { createCommunityDependencies } from './community/composition';
 // OpenAPI定義を登録（side-effect import）
 import './auth/controllers/auth-openapi';
-import './meetup/controllers/community-openapi';
-import './meetup/controllers/member-openapi';
+import './community/controllers/community-openapi';
+import './community/controllers/member-openapi';
 
 // ============================================================
 // Express Application Factory
@@ -50,16 +50,16 @@ export function createApp(prismaClient: PrismaClient = defaultPrisma): Applicati
 
   // Composition Root: 依存性の構成
   const authDeps = createAuthDependencies(prismaClient);
-  const meetupDeps = createMeetupDependencies(prismaClient);
+  const communityDeps = createCommunityDependencies(prismaClient);
 
   // Auth routes
   application.use('/auth', createAuthRouter(authDeps));
 
   // Community routes
-  application.use('/communities', createCommunityRouter(meetupDeps.community));
+  application.use('/communities', createCommunityRouter(communityDeps.community));
 
   // Member routes (nested under communities)
-  application.use('/communities/:id/members', createMemberRouter(meetupDeps.member));
+  application.use('/communities/:id/members', createMemberRouter(communityDeps.member));
 
   // Error handler (MUST be last)
   application.use(errorHandlerMiddleware);
