@@ -30,3 +30,5 @@ npm-debug.log*
 
 # Test
 coverage/
+test-results/
+e2e/test-results/
