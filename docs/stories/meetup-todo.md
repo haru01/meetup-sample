@@ -161,94 +161,371 @@ Issueが「完了」となるための条件:
 
 ## Phase 3: イベント管理（community コンテキスト）
 
-> **スコープ外**: フェーズ2までの実装に絞っている
+> **Note**: MTP-010 はチュートリアル題材として実装対象。MTP-011〜015 は未実装。
 
-### MTP-010: イベント作成API
+### MTP-010: イベント作成
 
-- [ ] タイトル、説明、開催日時、終了日時、開催形式、定員でイベントを作成できる
-- [ ] 開始日時は現在時刻より未来でなければならない
+**概要**
+コミュニティのオーナーまたは管理者が、コミュニティ内にイベントを作成できる機能を実装する。API・UI・E2E をフルスタックで実装する。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `POST /communities/:communityId/events` でイベントを作成できる
+- [ ] タイトル（1〜100文字）、説明（最大1000文字）、開催日時、終了日時、開催形式（ONLINE / OFFLINE / HYBRID）、定員（1〜1000）を指定できる
+- [ ] 開始日時は現在時刻より未来でなければならない（`EventDateInPast` エラー）
+- [ ] 終了日時は開始日時より後でなければならない（`EventEndBeforeStart` エラー）
 - [ ] 作成直後のイベント状態は `DRAFT` である
+- [ ] オーナーまたは管理者のみ作成可能（`NotAuthorized` エラー）
+- [ ] 存在しないコミュニティは `CommunityNotFound` エラー
 
-### MTP-011: イベント公開API
+#### UI（Frontend）
+- [ ] コミュニティ詳細ページに「イベント作成」ボタンを表示する（オーナー/管理者のみ）
+- [ ] イベント作成フォーム（タイトル、説明、開催日時、終了日時、開催形式、定員）を表示する
+- [ ] バリデーションエラー時にエラーメッセージを表示する
+- [ ] 作成成功時にコミュニティ詳細ページへ遷移する
 
-- [ ] `DRAFT` → `PUBLISHED` 遷移
-- [ ] 公開時に `EventPublishedEvent` 発行
+#### E2E
+- [ ] オーナーがイベント作成フォームを入力し、作成が成功する一連のフローを確認する
+- [ ] 権限のないメンバーには「イベント作成」ボタンが表示されないことを確認する
 
-### MTP-012: イベント更新API
+### MTP-011: イベント公開
 
-- [ ] `DRAFT` / `PUBLISHED` のみ更新可能
+**概要**
+オーナーまたは管理者が DRAFT 状態のイベントを公開し、コミュニティメンバーに見えるようにする。
 
-### MTP-013: イベントキャンセルAPI
+**受け入れ条件**
 
-- [ ] `PUBLISHED` → `CANCELLED` 遷移
+#### API（Backend）
+- [ ] `PATCH /communities/:communityId/events/:eventId/publish` でイベントを公開できる
+- [ ] `DRAFT` → `PUBLISHED` のステータス遷移のみ許可（それ以外は `InvalidEventStatus` エラー）
+- [ ] 公開時に `EventPublishedEvent` をイベントバスに発行する
+- [ ] オーナーまたは管理者のみ操作可能（`NotAuthorized` エラー）
 
-### MTP-014: イベント詳細取得API
+#### UI（Frontend）
+- [ ] イベント詳細ページに「公開する」ボタンを表示する（DRAFT 状態 かつ オーナー/管理者のみ）
+- [ ] 公開確認ダイアログを表示し、確認後に公開する
+- [ ] 公開成功時にイベント詳細ページのステータス表示が `PUBLISHED` に更新される
 
-- [ ] イベント詳細情報の取得
+#### E2E
+- [ ] オーナーが DRAFT イベントを公開し、ステータスが PUBLISHED に変わるフローを確認する
 
-### MTP-015: イベント一覧取得API
+---
 
-- [ ] コミュニティのイベント一覧取得
+### MTP-012: イベント更新
+
+**概要**
+オーナーまたは管理者が DRAFT または PUBLISHED 状態のイベント情報を更新できる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `PUT /communities/:communityId/events/:eventId` でイベントを更新できる
+- [ ] `DRAFT` / `PUBLISHED` のイベントのみ更新可能（`CANCELLED` は `InvalidEventStatus` エラー）
+- [ ] 更新可能フィールド: タイトル、説明、開催日時、終了日時、開催形式、定員
+- [ ] オーナーまたは管理者のみ操作可能（`NotAuthorized` エラー）
+
+#### UI（Frontend）
+- [ ] イベント詳細ページに「編集」ボタンを表示する（DRAFT/PUBLISHED かつ オーナー/管理者のみ）
+- [ ] イベント編集フォームに既存値をプリフィルして表示する
+- [ ] 更新成功時にイベント詳細ページへ遷移する
+
+#### E2E
+- [ ] オーナーがイベント情報を編集し、更新内容が反映されるフローを確認する
+
+---
+
+### MTP-013: イベントキャンセル
+
+**概要**
+オーナーまたは管理者が PUBLISHED 状態のイベントをキャンセルできる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `PATCH /communities/:communityId/events/:eventId/cancel` でイベントをキャンセルできる
+- [ ] `PUBLISHED` → `CANCELLED` のステータス遷移のみ許可（それ以外は `InvalidEventStatus` エラー）
+- [ ] キャンセル時に `EventCancelledEvent` をイベントバスに発行する
+- [ ] オーナーまたは管理者のみ操作可能（`NotAuthorized` エラー）
+
+#### UI（Frontend）
+- [ ] イベント詳細ページに「キャンセル」ボタンを表示する（PUBLISHED かつ オーナー/管理者のみ）
+- [ ] キャンセル確認ダイアログを表示し、確認後にキャンセルする
+- [ ] キャンセル成功時にステータス表示が `CANCELLED` に更新される
+
+#### E2E
+- [ ] オーナーが PUBLISHED イベントをキャンセルし、ステータスが CANCELLED に変わるフローを確認する
+
+---
+
+### MTP-014: イベント詳細取得
+
+**概要**
+ユーザーがイベントの詳細情報を取得・閲覧できる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `GET /communities/:communityId/events/:eventId` でイベント詳細を取得できる
+- [ ] レスポンス: イベントID、タイトル、説明、開催日時、終了日時、開催形式、定員、ステータス、作成日時
+- [ ] 存在しないイベントは `EventNotFound` エラー
+- [ ] `DRAFT` イベントはオーナー/管理者のみ取得可能（一般メンバーには `EventNotFound`）
+
+#### UI（Frontend）
+- [ ] イベント詳細ページにイベント情報（タイトル、説明、日時、形式、定員、ステータス）を表示する
+- [ ] ステータスに応じたバッジ（DRAFT / PUBLISHED / CANCELLED）を表示する
+- [ ] 権限に応じて管理ボタン（公開・編集・キャンセル）を出し分ける
+
+#### E2E
+- [ ] メンバーが PUBLISHED イベントの詳細を閲覧できるフローを確認する
+
+---
+
+### MTP-015: イベント一覧取得
+
+**概要**
+コミュニティ内のイベント一覧を取得・閲覧できる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `GET /communities/:communityId/events` でイベント一覧を取得できる
+- [ ] ページネーション対応（limit/offset パラメータ）
+- [ ] 一般メンバーには `PUBLISHED` イベントのみ返す
+- [ ] オーナー/管理者には `DRAFT` / `PUBLISHED` / `CANCELLED` すべて返す
+
+#### UI（Frontend）
+- [ ] コミュニティ詳細ページにイベント一覧セクションを表示する
+- [ ] 各イベントをカード形式で表示する（タイトル、日時、形式、ステータスバッジ）
+- [ ] イベントカードをクリックするとイベント詳細ページへ遷移する
+- [ ] イベントが0件の場合は空状態メッセージを表示する
+
+#### E2E
+- [ ] コミュニティ詳細ページでイベント一覧が表示され、クリックで詳細に遷移するフローを確認する
 
 ---
 
 ## Phase 4: イベント参加申込（participation コンテキスト）
 
-> **スコープ外**
+### MTP-016: イベント参加申込
 
-### MTP-016: イベント参加申込API
+**概要**
+ログインユーザーが PUBLISHED 状態のイベントに参加申込できる。
 
-- [ ] イベントへの参加申込
+**受け入れ条件**
 
-### MTP-017: イベント参加キャンセルAPI
+#### API（Backend）
+- [ ] `POST /communities/:communityId/events/:eventId/registrations` でイベントに参加申込できる
+- [ ] 定員内の場合、ステータスは `CONFIRMED`
+- [ ] 定員超過の場合、ステータスは `WAITING`（キャンセル待ちリストに追加）
+- [ ] 同一イベントへの重複申込は `AlreadyRegistered` エラー
+- [ ] `PUBLISHED` 以外のイベントは `EventNotPublished` エラー
+- [ ] コミュニティメンバーのみ申込可能（`NotCommunityMember` エラー）
 
-- [ ] 参加キャンセル（開始1時間前まで）
+#### UI（Frontend）
+- [ ] イベント詳細ページに「参加する」ボタンを表示する（PUBLISHED かつ 未申込のメンバーのみ）
+- [ ] 定員超過時は「キャンセル待ちに登録」ボタンを表示する
+- [ ] 申込成功時にボタンが「参加済み」または「キャンセル待ち中」に変わる
+- [ ] 残り定員数を表示する（例:「残り 3 / 20 席」）
 
-### MTP-018: キャンセル待ち・繰上げAPI
+#### E2E
+- [ ] メンバーがイベントに参加申込し、CONFIRMED ステータスになるフローを確認する
+- [ ] 定員超過時にキャンセル待ちリストに登録されるフローを確認する
 
-- [ ] 定員満員時に Waitlist に自動追加（WAITING ステータス）
-- [ ] キャンセル発生時に Waitlist 先頭を自動繰上げ（WAITING → PROMOTED → CONFIRMED）
-- [ ] イベント開始時に未繰上げの Waitlist エントリを EXPIRED にする
+---
 
-### MTP-019: イベント参加者一覧取得API
+### MTP-017: イベント参加キャンセル
 
-- [ ] 主催者向け参加者一覧
+**概要**
+参加申込済みのユーザーが、イベント開始1時間前までキャンセルできる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `DELETE /communities/:communityId/events/:eventId/registrations/me` で参加をキャンセルできる
+- [ ] `CONFIRMED` → `CANCELLED` のステータス遷移
+- [ ] イベント開始1時間前を過ぎた場合は `CancellationDeadlinePassed` エラー
+- [ ] キャンセル発生時にキャンセル待ち先頭を自動繰上げする（MTP-018 と連動）
+
+#### UI（Frontend）
+- [ ] イベント詳細ページに「参加をキャンセル」ボタンを表示する（CONFIRMED のユーザーのみ）
+- [ ] キャンセル確認ダイアログを表示し、確認後にキャンセルする
+- [ ] キャンセル成功時にボタンが「参加する」に戻る
+- [ ] キャンセル期限を過ぎている場合はボタンを非活性にし、期限切れメッセージを表示する
+
+#### E2E
+- [ ] 参加者がイベント参加をキャンセルできるフローを確認する
+
+---
+
+### MTP-018: キャンセル待ち・繰上げ
+
+**概要**
+キャンセル発生時にキャンセル待ちリストの先頭を自動繰上げし、イベント開始時に未繰上げエントリを期限切れにする。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] キャンセル発生時に Waitlist 先頭を自動繰上げ（`WAITING` → `CONFIRMED`）
+- [ ] 繰上げ時に `RegistrationPromotedEvent` をイベントバスに発行する
+- [ ] イベント開始時に未繰上げの Waitlist エントリを `EXPIRED` にする
+- [ ] `GET /communities/:communityId/events/:eventId/registrations/me` で自分の申込ステータスを取得できる
+
+#### UI（Frontend）
+- [ ] キャンセル待ち中のユーザーに「キャンセル待ち中（n番目）」と順番を表示する
+- [ ] 繰上げが発生した場合、次回ページ表示時にステータスが `CONFIRMED` に更新されている
+
+#### E2E
+- [ ] 定員満員のイベントで参加者がキャンセルし、キャンセル待ち先頭が自動繰上げされるフローを確認する
+
+---
+
+### MTP-019: イベント参加者一覧
+
+**概要**
+オーナーまたは管理者がイベントの参加者一覧を取得・閲覧できる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `GET /communities/:communityId/events/:eventId/registrations` で参加者一覧を取得できる
+- [ ] レスポンス: ユーザーID、表示名、ステータス（CONFIRMED / WAITING / CANCELLED / EXPIRED）、申込日時
+- [ ] オーナーまたは管理者のみ取得可能（`NotAuthorized` エラー）
+- [ ] ページネーション対応（limit/offset パラメータ）
+
+#### UI（Frontend）
+- [ ] イベント詳細ページに「参加者一覧」セクションを表示する（オーナー/管理者のみ）
+- [ ] 参加者をステータスごとにグループ分けして表示する
+- [ ] 参加者数サマリー（確定 n名 / キャンセル待ち n名）を表示する
+
+#### E2E
+- [ ] オーナーがイベント参加者一覧を閲覧できるフローを確認する
 
 ---
 
 ## Phase 5: 検索・レコメンド
 
-> **スコープ外**
+### MTP-020: イベント横断検索
 
-### MTP-020: イベント横断検索API
+**概要**
+ユーザーがキーワードや条件でサイト横断的にイベントを検索できる。
 
-- [ ] キーワード・条件でサイト横断検索
+**受け入れ条件**
 
-### MTP-021: AIイベントレコメンドAPI
+#### API（Backend）
+- [ ] `GET /events/search` でコミュニティ横断のイベント検索ができる
+- [ ] キーワード（タイトル・説明の部分一致）、カテゴリ、開催形式、日付範囲でフィルタリングできる
+- [ ] `PUBLISHED` イベントのみ返す
+- [ ] ページネーション対応（limit/offset パラメータ）
 
-- [ ] AI によるイベントスコアリング・レコメンド
+#### UI（Frontend）
+- [ ] ヘッダーにイベント検索バーを表示する
+- [ ] 検索結果ページにフィルター（カテゴリ、形式、日付範囲）を表示する
+- [ ] 検索結果をイベントカード形式で表示する（コミュニティ名も表示）
+- [ ] 検索結果が0件の場合は空状態メッセージを表示する
 
-### MTP-022: AIコミュニティレコメンドAPI
+#### E2E
+- [ ] ユーザーがキーワードでイベントを検索し、結果が表示されるフローを確認する
 
-- [ ] AI によるコミュニティスコアリング・レコメンド
+---
+
+### MTP-021: AI イベントレコメンド
+
+**概要**
+ユーザーの参加履歴や興味に基づいて、AI がおすすめイベントをスコアリング・提案する。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `GET /events/recommendations` でユーザー向けおすすめイベントを取得できる
+- [ ] ユーザーの参加履歴、所属コミュニティのカテゴリを元にスコアリングする
+- [ ] `PUBLISHED` かつ 開催日時が未来のイベントのみ返す
+- [ ] 上位10件を返す
+
+#### UI（Frontend）
+- [ ] ホームページに「おすすめイベント」セクションを表示する（ログインユーザーのみ）
+- [ ] レコメンド理由を簡潔に表示する（例:「参加中のコミュニティのイベント」）
+- [ ] 未ログイン時は「ログインしておすすめを表示」メッセージを表示する
+
+#### E2E
+- [ ] ログインユーザーにおすすめイベントが表示されるフローを確認する
+
+---
+
+### MTP-022: AI コミュニティレコメンド
+
+**概要**
+ユーザーの所属コミュニティや参加履歴に基づいて、AI がおすすめコミュニティを提案する。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `GET /communities/recommendations` でユーザー向けおすすめコミュニティを取得できる
+- [ ] ユーザーの所属コミュニティのカテゴリ傾向からスコアリングする
+- [ ] `PUBLIC` かつ 未参加のコミュニティのみ返す
+- [ ] 上位10件を返す
+
+#### UI（Frontend）
+- [ ] ホームページに「おすすめコミュニティ」セクションを表示する（ログインユーザーのみ）
+- [ ] レコメンド理由を簡潔に表示する（例:「TECH カテゴリに興味がありそう」）
+
+#### E2E
+- [ ] ログインユーザーにおすすめコミュニティが表示されるフローを確認する
 
 ---
 
 ## Phase 6: 通知
 
-> **スコープ外**
+### MTP-023: 通知一覧取得
 
-### MTP-023: 通知一覧取得API
+**概要**
+ユーザー宛の通知（イベント公開、キャンセル待ち繰上げ等）を一覧で取得・閲覧できる。
 
-- [ ] ユーザー宛通知一覧
+**受け入れ条件**
 
-### MTP-024: 通知既読API
+#### API（Backend）
+- [ ] `GET /notifications` でログインユーザー宛の通知一覧を取得できる
+- [ ] 通知タイプ: `EVENT_PUBLISHED`、`REGISTRATION_PROMOTED`、`EVENT_CANCELLED`
+- [ ] 新しい順にソートして返す
+- [ ] ページネーション対応（limit/offset パラメータ）
+- [ ] 未読件数を返す
 
-- [ ] 通知の既読処理
+#### UI（Frontend）
+- [ ] ヘッダーに通知ベルアイコンを表示する（未読件数バッジ付き）
+- [ ] 通知一覧ドロップダウンまたはページを表示する
+- [ ] 各通知をクリックすると関連ページ（イベント詳細等）へ遷移する
+- [ ] 未読/既読のスタイルを区別する
+
+#### E2E
+- [ ] イベント公開後に通知が表示され、クリックでイベント詳細に遷移するフローを確認する
 
 ---
 
-## エラー型定義（実装済み）
+### MTP-024: 通知既読
+
+**概要**
+ユーザーが通知を既読にできる。
+
+**受け入れ条件**
+
+#### API（Backend）
+- [ ] `PATCH /notifications/:notificationId/read` で通知を既読にできる
+- [ ] `PATCH /notifications/read-all` で全通知を一括既読にできる
+- [ ] 既読済みの通知を再度既読にしてもエラーにならない（冪等）
+
+#### UI（Frontend）
+- [ ] 通知をクリックすると自動的に既読になる
+- [ ] 「すべて既読にする」ボタンを表示する
+- [ ] 既読後にヘッダーの未読バッジが更新される
+
+#### E2E
+- [ ] 通知を既読にし、未読バッジが減るフローを確認する
+
+---
+
+## エラー型定義
+
+### 実装済み（auth / community）
 
 ```typescript
 // src/auth/errors/auth-errors.ts
@@ -292,6 +569,56 @@ export type ListMembersError =
 export type ListCommunitiesError = never;
 ```
 
+### 未実装（event / participation / notification）
+
+```typescript
+// Phase 3: イベント管理
+export type CreateEventError =
+  | { type: 'CommunityNotFound' }
+  | { type: 'NotAuthorized' }
+  | { type: 'EventDateInPast' }
+  | { type: 'EventEndBeforeStart' };
+
+export type PublishEventError =
+  | { type: 'EventNotFound' }
+  | { type: 'NotAuthorized' }
+  | { type: 'InvalidEventStatus' };
+
+export type UpdateEventError =
+  | { type: 'EventNotFound' }
+  | { type: 'NotAuthorized' }
+  | { type: 'InvalidEventStatus' }
+  | { type: 'EventDateInPast' }
+  | { type: 'EventEndBeforeStart' };
+
+export type CancelEventError =
+  | { type: 'EventNotFound' }
+  | { type: 'NotAuthorized' }
+  | { type: 'InvalidEventStatus' };
+
+export type GetEventError =
+  | { type: 'EventNotFound' };
+
+export type ListEventsError =
+  | { type: 'CommunityNotFound' };
+
+// Phase 4: イベント参加申込
+export type RegisterEventError =
+  | { type: 'EventNotFound' }
+  | { type: 'EventNotPublished' }
+  | { type: 'NotCommunityMember' }
+  | { type: 'AlreadyRegistered' };
+
+export type CancelRegistrationError =
+  | { type: 'EventNotFound' }
+  | { type: 'RegistrationNotFound' }
+  | { type: 'CancellationDeadlinePassed' };
+
+export type ListRegistrationsError =
+  | { type: 'EventNotFound' }
+  | { type: 'NotAuthorized' };
+```
+
 ---
 
 ## ステータス遷移
@@ -305,20 +632,27 @@ PENDING → ACTIVE（承認）
 
 > **Note**: OWNER は脱退不可
 
-### イベント参加ステータス（participation コンテキスト）
+### イベントステータス（community コンテキスト）
 
-> **Note**: Phase 4 で実装予定
+```text
+DRAFT → PUBLISHED（公開）
+         ↘ CANCELLED（キャンセル）
+```
+
+> **Note**: DRAFT は作成者/管理者のみ閲覧可能
+
+### イベント参加ステータス（participation コンテキスト）
 
 ```text
 参加申込:
   定員内 → CONFIRMED
-  定員超過 → WAITING（Waitlist に追加）
+  定員超過 → WAITING（キャンセル待ちリストに追加）
 
 キャンセル:
-  CONFIRMED → CANCELLED → Waitlist 先頭を PROMOTED → CONFIRMED
+  CONFIRMED → CANCELLED → Waitlist 先頭を自動繰上げ → CONFIRMED
 
 Waitlist:
-  WAITING → PROMOTED（キャンセル発生時、自動繰上げ）
+  WAITING → CONFIRMED（キャンセル発生時、自動繰上げ）
   WAITING → EXPIRED（イベント開始時）
 ```
 
@@ -350,7 +684,18 @@ Phase 1（登録・認証）  ← 最小限実装済み
 | 2 | MTP-007 承認・拒否 | :white_check_mark: 実装済み |
 | 2 | MTP-008 詳細取得 | :white_check_mark: 実装済み |
 | 2 | MTP-009 一覧・検索 | :white_check_mark: 実装済み（キーワード検索除く） |
-| 3 | MTP-010〜015 イベント管理 | :black_square_button: 未実装 |
-| 4 | MTP-016〜019 イベント参加 | :black_square_button: 未実装 |
-| 5 | MTP-020〜022 検索・AI | :black_square_button: 未実装 |
-| 6 | MTP-023〜024 通知 | :black_square_button: 未実装 |
+| 3 | MTP-010 イベント作成（フルスタック） | :black_square_button: 未実装（チュートリアル題材） |
+| 3 | MTP-011 イベント公開 | :black_square_button: 未実装 |
+| 3 | MTP-012 イベント更新 | :black_square_button: 未実装 |
+| 3 | MTP-013 イベントキャンセル | :black_square_button: 未実装 |
+| 3 | MTP-014 イベント詳細取得 | :black_square_button: 未実装 |
+| 3 | MTP-015 イベント一覧取得 | :black_square_button: 未実装 |
+| 4 | MTP-016 イベント参加申込 | :black_square_button: 未実装 |
+| 4 | MTP-017 イベント参加キャンセル | :black_square_button: 未実装 |
+| 4 | MTP-018 キャンセル待ち・繰上げ | :black_square_button: 未実装 |
+| 4 | MTP-019 イベント参加者一覧 | :black_square_button: 未実装 |
+| 5 | MTP-020 イベント横断検索 | :black_square_button: 未実装 |
+| 5 | MTP-021 AI イベントレコメンド | :black_square_button: 未実装 |
+| 5 | MTP-022 AI コミュニティレコメンド | :black_square_button: 未実装 |
+| 6 | MTP-023 通知一覧取得 | :black_square_button: 未実装 |
+| 6 | MTP-024 通知既読 | :black_square_button: 未実装 |
