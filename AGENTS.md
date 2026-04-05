@@ -100,16 +100,16 @@ Monorepo with npm workspaces: `backend/`, `frontend/`, `e2e/`
 DDD bounded contexts with layered structure: `controllers/` -> `usecases/` -> `models/`, `repositories/`, `services/`
 
 - `backend/src/auth/` — Authentication context (registration, login, JWT)
-- `backend/src/meetup/` — Meetup context (community CRUD, membership management)
+- `backend/src/community/` — Community context (community CRUD, membership management)
 - `backend/src/shared/` — Shared kernel (Result type, Branded Types, Event Bus, middleware, OpenAPI registry)
 - `backend/src/infrastructure/` — Prisma client, test helpers
 
 ### Frontend
 
-React 19 + Vite + Tailwind CSS + React Router — auth/meetup コンテキスト分離構成
+React 19 + Vite + Tailwind CSS + React Router — auth/community コンテキスト分離構成
 
 - `frontend/src/auth/` — Authentication context (pages, hooks, contexts)
-- `frontend/src/meetup/` — Meetup context (pages, components, hooks, utils)
+- `frontend/src/community/` — Community context (pages, components, hooks, utils)
 - `frontend/src/components/` — Shared UI components (Button, Input, Card, ErrorAlert, Layout)
 - `frontend/src/lib/` — API client, token management, shared types
 
