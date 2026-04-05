@@ -5,7 +5,7 @@ import { createCommunity } from '../../models/community';
 import type { CommunityCategory, CommunityVisibility } from '../../models/schemas/community.schema';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { CreateCommunityError, CommunityCreatedEvent } from '../../errors/meetup-errors';
+import type { CreateCommunityError, CommunityCreatedEvent } from '../../errors/community-errors';
 
 /** 1ユーザーあたりの最大コミュニティ作成数 */
 const MAX_COMMUNITIES_PER_USER = 10;

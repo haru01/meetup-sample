@@ -3,7 +3,7 @@ import type { CommunityId } from '@shared/schemas/common';
 import type { CommunityMember } from '../../models/community-member';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { ListMembersError } from '../../errors/meetup-errors';
+import type { ListMembersError } from '../../errors/community-errors';
 
 // ============================================================
 // メンバー一覧取得コマンド

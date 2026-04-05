@@ -4,7 +4,7 @@ import type {
   ApproveMemberError,
   RejectMemberError,
   ListMembersError,
-} from '../errors/meetup-errors';
+} from '../errors/community-errors';
 import type { ErrorResponse } from '@shared/controllers/error-response';
 
 // ============================================================

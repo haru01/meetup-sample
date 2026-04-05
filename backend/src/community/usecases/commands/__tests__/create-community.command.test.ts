@@ -4,7 +4,7 @@ import type { CreateCommunityInput } from '../create-community.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import { InMemoryEventBus } from '@shared/event-bus';
-import type { CommunityCreatedEvent } from '../../../errors/meetup-errors';
+import type { CommunityCreatedEvent } from '../../../errors/community-errors';
 import { createCommunityId } from '@shared/schemas/id-factories';
 import { createCommunityMemberId } from '@shared/schemas/id-factories';
 import { createAccountId } from '@shared/schemas/id-factories';

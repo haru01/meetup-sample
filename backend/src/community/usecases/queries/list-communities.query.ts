@@ -3,7 +3,7 @@ import type { AccountId } from '@shared/schemas/common';
 import type { Community } from '../../models/community';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityVisibility } from '../../models/schemas/community.schema';
-import type { ListCommunitiesError } from '../../errors/meetup-errors';
+import type { ListCommunitiesError } from '../../errors/community-errors';
 
 // ============================================================
 // コミュニティ一覧取得コマンド

@@ -1,4 +1,4 @@
-import type { CreateCommunityError, GetCommunityError } from '../errors/meetup-errors';
+import type { CreateCommunityError, GetCommunityError } from '../errors/community-errors';
 import type { ErrorResponse } from '@shared/controllers/error-response';
 
 // ============================================================

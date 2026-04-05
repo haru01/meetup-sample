@@ -5,7 +5,7 @@ import type {
   CommunityMemberStatus,
 } from '../../models/schemas/member.schema';
 import { ok, err, type Result } from '@shared/result';
-import type { ListMembersError } from '../../errors/meetup-errors';
+import type { ListMembersError } from '../../errors/community-errors';
 
 // ============================================================
 // メンバー Read モデル

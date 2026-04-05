@@ -2,7 +2,7 @@ import { ok, err, type Result } from '@shared/result';
 import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/common';
 import type { Community } from './community';
 import { CommunityMemberRole, CommunityMemberStatus } from './schemas/member.schema';
-import type { LeaveCommunityError, ApproveMemberError } from '../errors/meetup-errors';
+import type { LeaveCommunityError, ApproveMemberError } from '../errors/community-errors';
 
 // ============================================================
 // コミュニティメンバーエンティティ

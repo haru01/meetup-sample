@@ -3,7 +3,7 @@ import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/
 import { CommunityMemberRole } from '../../models/schemas/member.schema';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { RejectMemberError } from '../../errors/meetup-errors';
+import type { RejectMemberError } from '../../errors/community-errors';
 
 // ============================================================
 // メンバー拒否コマンド

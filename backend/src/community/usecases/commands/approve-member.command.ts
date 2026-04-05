@@ -5,7 +5,7 @@ import { approveMember } from '../../models/community-member';
 import { CommunityMemberRole } from '../../models/schemas/member.schema';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { ApproveMemberError } from '../../errors/meetup-errors';
+import type { ApproveMemberError } from '../../errors/community-errors';
 
 // ============================================================
 // メンバー承認コマンド

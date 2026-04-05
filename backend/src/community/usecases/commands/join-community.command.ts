@@ -4,7 +4,7 @@ import type { CommunityMember } from '../../models/community-member';
 import { joinCommunity } from '../../models/community-member';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { JoinCommunityError } from '../../errors/meetup-errors';
+import type { JoinCommunityError } from '../../errors/community-errors';
 
 // ============================================================
 // コミュニティ参加コマンド

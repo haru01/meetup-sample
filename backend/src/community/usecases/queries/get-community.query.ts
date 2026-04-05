@@ -3,7 +3,7 @@ import type { AccountId, CommunityId } from '@shared/schemas/common';
 import type { Community } from '../../models/community';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { GetCommunityError } from '../../errors/meetup-errors';
+import type { GetCommunityError } from '../../errors/community-errors';
 
 // ============================================================
 // コミュニティ取得コマンド

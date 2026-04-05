@@ -3,7 +3,7 @@ import type { AccountId, CommunityId, CommunityMemberId } from '@shared/schemas/
 import { leaveCommunity } from '../../models/community-member';
 import type { CommunityRepository } from '../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../repositories/community-member.repository';
-import type { LeaveCommunityError } from '../../errors/meetup-errors';
+import type { LeaveCommunityError } from '../../errors/community-errors';
 
 // ============================================================
 // コミュニティ脱退コマンド
