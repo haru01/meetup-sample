@@ -11,10 +11,10 @@ import { GetCommunityQuery } from './usecases/queries/get-community.query';
 import { ListCommunitiesQuery } from './usecases/queries/list-communities.query';
 import { ListMembersQuery } from './usecases/queries/list-members.query';
 import { ListMembersReadQuery } from './usecases/queries/list-members-read.query';
-import type { CommunityCreatedEvent } from './errors/meetup-errors';
+import type { CommunityCreatedEvent } from './errors/community-errors';
 
 // ============================================================
-// Meetup コンテキスト 依存性構成
+// Community コンテキスト 依存性構成
 // ============================================================
 
 export interface CommunityDependencies {
@@ -33,9 +33,9 @@ export interface MemberDependencies {
 }
 
 /**
- * Meetup コンテキストの依存性を構成する（Composition Root）
+ * Community コンテキストの依存性を構成する（Composition Root）
  */
-export function createMeetupDependencies(prisma: PrismaClient): {
+export function createCommunityDependencies(prisma: PrismaClient): {
   community: CommunityDependencies;
   member: MemberDependencies;
 } {
