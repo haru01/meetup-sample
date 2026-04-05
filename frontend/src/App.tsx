@@ -3,10 +3,10 @@ import { AuthProvider } from "./auth/contexts/AuthContext";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./auth/pages/LoginPage";
 import { RegisterPage } from "./auth/pages/RegisterPage";
-import { CommunityListPage } from "./meetup/pages/CommunityListPage";
-import { CommunityDetailPage } from "./meetup/pages/CommunityDetailPage";
-import { CommunityCreatePage } from "./meetup/pages/CommunityCreatePage";
-import { MyCommunitiesPage } from "./meetup/pages/MyCommunitiesPage";
+import { CommunityListPage } from "./community/pages/CommunityListPage";
+import { CommunityDetailPage } from "./community/pages/CommunityDetailPage";
+import { CommunityCreatePage } from "./community/pages/CommunityCreatePage";
+import { MyCommunitiesPage } from "./community/pages/MyCommunitiesPage";
 
 export function App() {
   return (

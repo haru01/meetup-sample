@@ -29,4 +29,4 @@ export type {
   BanMemberRequest,
   ListMembersResponse,
   MemberResponse,
-} from "../meetup/types";
+} from "../community/types";
