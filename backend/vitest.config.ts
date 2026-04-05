@@ -36,7 +36,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@auth': path.resolve(__dirname, 'src/auth'),
-      '@meetup': path.resolve(__dirname, 'src/meetup'),
+      '@community': path.resolve(__dirname, 'src/community'),
     },
   },
 });

@@ -22,7 +22,7 @@
       "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@auth/*": ["src/auth/*"],
-      "@meetup/*": ["src/meetup/*"]
+      "@community/*": ["src/community/*"]
     }
   },
   "include": ["src"],

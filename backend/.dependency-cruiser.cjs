@@ -15,22 +15,22 @@ module.exports = {
 
     // 境界づけられたコンテキスト間の直接依存を禁止
     {
-      name: 'no-cross-context-auth-to-meetup',
+      name: 'no-cross-context-auth-to-community',
       severity: 'error',
-      comment: 'auth と meetup は直接依存できません。shared を経由してください',
+      comment: 'auth と community は直接依存できません。shared を経由してください',
       from: {
         path: '^src/auth/',
       },
       to: {
-        path: '^src/meetup/',
+        path: '^src/community/',
       },
     },
     {
-      name: 'no-cross-context-meetup-to-auth',
+      name: 'no-cross-context-community-to-auth',
       severity: 'error',
-      comment: 'meetup と auth は直接依存できません。shared を経由してください',
+      comment: 'community と auth は直接依存できません。shared を経由してください',
       from: {
-        path: '^src/meetup/',
+        path: '^src/community/',
       },
       to: {
         path: '^src/auth/',
@@ -46,7 +46,7 @@ module.exports = {
         path: '^src/infrastructure/',
       },
       to: {
-        path: '^src/(auth|meetup)/(usecases|models|repositories|services)/',
+        path: '^src/(auth|community)/(usecases|models|repositories|services)/',
       },
     },
 
