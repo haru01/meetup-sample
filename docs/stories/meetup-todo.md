@@ -16,7 +16,7 @@
 1. **コミュニティ作成** — オーナーがテーマ・カテゴリ・公開設定（PUBLIC/PRIVATE）を決めて**コミュニティを立ち上げる**
 2. **参加申請の管理**（PRIVATEの場合） — 届いた参加申請を**承認 or 拒否**する
 
-> **Note**: イベント管理（作成・公開・キャンセル等）はフェーズ3以降で対応予定
+> **Note**: イベント管理（作成・公開・キャンセル等）はフェーズ3（community コンテキスト）で対応予定
 
 ### 3. コミュニティへの参加（メンバー視点）
 
@@ -24,7 +24,7 @@
 2. **参加** — PUBLICなら即参加、PRIVATEなら承認待ち（`PENDING` → `ACTIVE`）
 3. **脱退** — コミュニティから**脱退**する（オーナーは脱退不可）
 
-> **Note**: イベント参加・キャンセル待ち等はフェーズ3-4以降で対応予定
+> **Note**: イベント参加・キャンセル待ち等はフェーズ4（participation コンテキスト）で対応予定
 
 ### 4. 発見と通知
 
@@ -159,7 +159,7 @@ Issueが「完了」となるための条件:
 
 ---
 
-## Phase 3: イベント管理
+## Phase 3: イベント管理（community コンテキスト）
 
 > **スコープ外**: フェーズ2までの実装に絞っている
 
@@ -192,7 +192,7 @@ Issueが「完了」となるための条件:
 
 ---
 
-## Phase 4: イベント参加申込
+## Phase 4: イベント参加申込（participation コンテキスト）
 
 > **スコープ外**
 
@@ -204,9 +204,11 @@ Issueが「完了」となるための条件:
 
 - [ ] 参加キャンセル（開始1時間前まで）
 
-### MTP-018: キャンセル待ち登録API
+### MTP-018: キャンセル待ち・繰上げAPI
 
-- [ ] 定員満員時のキャンセル待ち
+- [ ] 定員満員時に Waitlist に自動追加（WAITING ステータス）
+- [ ] キャンセル発生時に Waitlist 先頭を自動繰上げ（WAITING → PROMOTED → CONFIRMED）
+- [ ] イベント開始時に未繰上げの Waitlist エントリを EXPIRED にする
 
 ### MTP-019: イベント参加者一覧取得API
 
@@ -256,7 +258,7 @@ export type RegisterAccountError =
 export type LoginError =
   | { type: 'InvalidCredentials' };
 
-// src/meetup/errors/meetup-errors.ts
+// src/community/errors/community-errors.ts
 export type CreateCommunityError =
   | { type: 'DuplicateCommunityName'; name: string }
   | { type: 'TooManyCommunities' };
@@ -303,6 +305,23 @@ PENDING → ACTIVE（承認）
 
 > **Note**: OWNER は脱退不可
 
+### イベント参加ステータス（participation コンテキスト）
+
+> **Note**: Phase 4 で実装予定
+
+```text
+参加申込:
+  定員内 → CONFIRMED
+  定員超過 → WAITING（Waitlist に追加）
+
+キャンセル:
+  CONFIRMED → CANCELLED → Waitlist 先頭を PROMOTED → CONFIRMED
+
+Waitlist:
+  WAITING → PROMOTED（キャンセル発生時、自動繰上げ）
+  WAITING → EXPIRED（イベント開始時）
+```
+
 ---
 
 ## 依存関係
@@ -310,8 +329,8 @@ PENDING → ACTIVE（承認）
 ```text
 Phase 1（登録・認証）  ← 最小限実装済み
   └─ Phase 2（コミュニティ管理）  ← 実装済み
-       └─ Phase 3（イベント管理）  ← 未実装
-            └─ Phase 4（イベント参加申込）  ← 未実装
+       └─ Phase 3（イベント管理 / community コンテキスト）  ← 未実装
+            └─ Phase 4（イベント参加申込 / participation コンテキスト）  ← 未実装
   └─ Phase 5（検索・レコメンド）  ← 未実装
   └─ Phase 6（通知）  ← 未実装
 ```
