@@ -31,17 +31,19 @@ export type ListCommunitiesResult = {
  * memberAccountId 指定時はそのユーザーが所属するコミュニティ一覧を返す。
  * 未指定時は PUBLIC コミュニティのみを返す。
  */
-export class ListCommunitiesQuery {
-  constructor(private readonly communityRepository: CommunityRepository) {}
+export type ListCommunitiesQuery = (
+  command: ListCommunitiesInput
+) => Promise<Result<ListCommunitiesResult, ListCommunitiesError>>;
 
-  async execute(
-    command: ListCommunitiesInput
-  ): Promise<Result<ListCommunitiesResult, ListCommunitiesError>> {
+export function createListCommunitiesQuery(
+  communityRepository: CommunityRepository
+): ListCommunitiesQuery {
+  return async (command) => {
     const visibility: CommunityVisibility | undefined = command.memberAccountId
       ? undefined
       : 'PUBLIC';
 
-    const { communities, total } = await this.communityRepository.findAll({
+    const { communities, total } = await communityRepository.findAll({
       category: command.category,
       memberAccountId: command.memberAccountId,
       visibility,
@@ -50,5 +52,5 @@ export class ListCommunitiesQuery {
     });
 
     return ok({ communities, total });
-  }
+  };
 }

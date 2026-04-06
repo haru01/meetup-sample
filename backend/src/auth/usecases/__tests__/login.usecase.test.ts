@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LoginUseCase } from '../login.usecase';
+import { createLoginUseCase } from '../login.usecase';
 import type { AccountRepository } from '../../repositories/account.repository';
 import type { PasswordHasher } from '../../services/password-hasher';
 import type { TokenService } from '../../services/token-service';
@@ -48,7 +48,7 @@ describe('LoginUseCase', () => {
   let repository: AccountRepository;
   let passwordHasher: PasswordHasher;
   let tokenService: TokenService;
-  let usecase: LoginUseCase;
+  let usecase: ReturnType<typeof createLoginUseCase>;
 
   const validInput = {
     email: 'test@example.com',
@@ -59,12 +59,12 @@ describe('LoginUseCase', () => {
     repository = createMockAccountRepository();
     passwordHasher = createMockPasswordHasher();
     tokenService = createMockTokenService();
-    usecase = new LoginUseCase(repository, passwordHasher, tokenService);
+    usecase = createLoginUseCase(repository, passwordHasher, tokenService);
   });
 
   describe('成功ケース', () => {
     it('有効な認証情報でログインし、tokenとアカウント情報を返す', async () => {
-      const result = await usecase.execute(validInput);
+      const result = await usecase(validInput);
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -79,13 +79,13 @@ describe('LoginUseCase', () => {
     });
 
     it('tokenServiceのgenerateがaccountIdで呼ばれる', async () => {
-      await usecase.execute(validInput);
+      await usecase(validInput);
 
       expect(tokenService.generate).toHaveBeenCalledWith({ accountId: 'account-id' });
     });
 
     it('passwordHasherのverifyが呼ばれる', async () => {
-      await usecase.execute(validInput);
+      await usecase(validInput);
 
       expect(passwordHasher.verify).toHaveBeenCalledWith('password123', 'hashed_password');
     });
@@ -94,13 +94,13 @@ describe('LoginUseCase', () => {
   describe('エラーケース', () => {
     it('メールアドレスが存在しない場合、InvalidCredentialsエラーを返す', async () => {
       const repoWithNoAccount = createMockAccountRepository(null);
-      const usecaseWithNoAccount = new LoginUseCase(
+      const usecaseWithNoAccount = createLoginUseCase(
         repoWithNoAccount,
         passwordHasher,
         tokenService
       );
 
-      const result = await usecaseWithNoAccount.execute(validInput);
+      const result = await usecaseWithNoAccount(validInput);
 
       expect(result.ok).toBe(false);
       if (result.ok) return;
@@ -110,13 +110,13 @@ describe('LoginUseCase', () => {
 
     it('パスワードが不正な場合、InvalidCredentialsエラーを返す', async () => {
       const invalidPasswordHasher = createMockPasswordHasher(false);
-      const usecaseWithInvalidPassword = new LoginUseCase(
+      const usecaseWithInvalidPassword = createLoginUseCase(
         repository,
         invalidPasswordHasher,
         tokenService
       );
 
-      const result = await usecaseWithInvalidPassword.execute(validInput);
+      const result = await usecaseWithInvalidPassword(validInput);
 
       expect(result.ok).toBe(false);
       if (result.ok) return;

@@ -58,7 +58,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const accountId = req.accountId as AccountId;
     const memberId = createCommunityMemberId();
 
-    const result = await joinCommunityCommand.execute({
+    const result = await joinCommunityCommand({
       communityId,
       accountId,
       memberId,
@@ -80,7 +80,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const communityId = req.params['id'] as CommunityId;
     const accountId = req.accountId as AccountId;
 
-    const result = await leaveCommunityCommand.execute({
+    const result = await leaveCommunityCommand({
       communityId,
       accountId,
     });
@@ -102,7 +102,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const memberId = req.params['memberId'] as CommunityMemberId;
     const accountId = req.accountId as AccountId;
 
-    const result = await leaveCommunityCommand.execute({
+    const result = await leaveCommunityCommand({
       communityId,
       accountId,
       memberId,
@@ -125,7 +125,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     const limit = parseInt((req.query['limit'] as string | undefined) ?? '20', 10);
     const offset = parseInt((req.query['offset'] as string | undefined) ?? '0', 10);
 
-    const result = await listMembersReadQuery.execute({ communityId, limit, offset });
+    const result = await listMembersReadQuery({ communityId, limit, offset });
 
     if (!result.ok) {
       const { status, response } = mapListMembersErrorToResponse(result.error);
@@ -158,7 +158,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
       const communityId = req.params['id'] as CommunityId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
-      const result = await approveMemberCommand.execute({
+      const result = await approveMemberCommand({
         communityId,
         targetMemberId,
       });
@@ -184,7 +184,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
       const communityId = req.params['id'] as CommunityId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
-      const result = await rejectMemberCommand.execute({
+      const result = await rejectMemberCommand({
         communityId,
         targetMemberId,
       });

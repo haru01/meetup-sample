@@ -40,24 +40,24 @@ export type CreateCommunityResult = {
  *
  * 名前重複チェック・上限チェック後、コミュニティを作成しイベントを発行する。
  */
-export class CreateCommunityCommand {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository,
-    private readonly eventBus: InMemoryEventBus<CommunityCreatedEvent>
-  ) {}
+export type CreateCommunityCommand = (
+  command: CreateCommunityInput
+) => Promise<Result<CreateCommunityResult, CreateCommunityError>>;
 
-  async execute(
-    command: CreateCommunityInput
-  ): Promise<Result<CreateCommunityResult, CreateCommunityError>> {
+export function createCreateCommunityCommand(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository,
+  eventBus: InMemoryEventBus<CommunityCreatedEvent>
+): CreateCommunityCommand {
+  return async (command) => {
     // 名前重複チェック
-    const existing = await this.communityRepository.findByName(command.name);
+    const existing = await communityRepository.findByName(command.name);
     if (existing) {
       return err({ type: 'DuplicateCommunityName', name: command.name });
     }
 
     // オーナーのコミュニティ数チェック
-    const count = await this.communityRepository.countByOwnerAccountId(command.accountId);
+    const count = await communityRepository.countByOwnerAccountId(command.accountId);
     if (count >= MAX_COMMUNITIES_PER_USER) {
       return err({ type: 'TooManyCommunities' });
     }
@@ -79,8 +79,8 @@ export class CreateCommunityCommand {
     const { community, ownerMember } = createResult.value;
 
     // リポジトリに保存
-    await this.communityRepository.save(community);
-    await this.communityMemberRepository.save(ownerMember);
+    await communityRepository.save(community);
+    await communityMemberRepository.save(ownerMember);
 
     // イベント発行
     const event: CommunityCreatedEvent = {
@@ -90,8 +90,8 @@ export class CreateCommunityCommand {
       name: community.name,
       occurredAt: command.createdAt,
     };
-    await this.eventBus.publish(event);
+    await eventBus.publish(event);
 
     return ok({ community, ownerMember });
-  }
+  };
 }

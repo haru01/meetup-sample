@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RegisterUseCase } from '../register.usecase';
+import { createRegisterUseCase } from '../register.usecase';
 import type { AccountRepository } from '../../repositories/account.repository';
 import type { PasswordHasher } from '../../services/password-hasher';
 import type { Account } from '../../models/account';
@@ -31,7 +31,7 @@ function createMockPasswordHasher(): PasswordHasher {
 describe('RegisterUseCase', () => {
   let repository: AccountRepository;
   let passwordHasher: PasswordHasher;
-  let usecase: RegisterUseCase;
+  let usecase: ReturnType<typeof createRegisterUseCase>;
 
   const validInput = {
     name: 'テストユーザー',
@@ -44,12 +44,12 @@ describe('RegisterUseCase', () => {
   beforeEach(() => {
     repository = createMockAccountRepository();
     passwordHasher = createMockPasswordHasher();
-    usecase = new RegisterUseCase(repository, passwordHasher);
+    usecase = createRegisterUseCase(repository, passwordHasher);
   });
 
   describe('成功ケース', () => {
     it('有効な入力でアカウントを登録し、Accountを返す', async () => {
-      const result = await usecase.execute(validInput);
+      const result = await usecase(validInput);
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -60,7 +60,7 @@ describe('RegisterUseCase', () => {
     });
 
     it('パスワードがハッシュ化されて保存される', async () => {
-      const result = await usecase.execute(validInput);
+      const result = await usecase(validInput);
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -70,7 +70,7 @@ describe('RegisterUseCase', () => {
     });
 
     it('repositoryのsaveが呼ばれる', async () => {
-      await usecase.execute(validInput);
+      await usecase(validInput);
 
       expect(repository.save).toHaveBeenCalledTimes(1);
     });
@@ -86,9 +86,9 @@ describe('RegisterUseCase', () => {
         createdAt: new Date(),
       };
       const repoWithExisting = createMockAccountRepository(existingAccount);
-      const usecaseWithExisting = new RegisterUseCase(repoWithExisting, passwordHasher);
+      const usecaseWithExisting = createRegisterUseCase(repoWithExisting, passwordHasher);
 
-      const result = await usecaseWithExisting.execute(validInput);
+      const result = await usecaseWithExisting(validInput);
 
       expect(result.ok).toBe(false);
       if (result.ok) return;

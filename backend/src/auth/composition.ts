@@ -2,8 +2,8 @@ import type { PrismaClient } from '@prisma/client';
 import { PrismaAccountRepository } from './repositories/prisma-account.repository';
 import { BcryptPasswordHasher } from './services/bcrypt-password-hasher';
 import { JwtTokenService } from './services/jwt-token-service';
-import { RegisterUseCase } from './usecases/register.usecase';
-import { LoginUseCase } from './usecases/login.usecase';
+import { createRegisterUseCase, type RegisterUseCase } from './usecases/register.usecase';
+import { createLoginUseCase, type LoginUseCase } from './usecases/login.usecase';
 import type { TokenService } from './services/token-service';
 
 // ============================================================
@@ -25,8 +25,8 @@ export function createAuthDependencies(prisma: PrismaClient): AuthDependencies {
   const tokenService = new JwtTokenService();
 
   return {
-    registerUseCase: new RegisterUseCase(accountRepository, passwordHasher),
-    loginUseCase: new LoginUseCase(accountRepository, passwordHasher, tokenService),
+    registerUseCase: createRegisterUseCase(accountRepository, passwordHasher),
+    loginUseCase: createLoginUseCase(accountRepository, passwordHasher, tokenService),
     tokenService,
   };
 }

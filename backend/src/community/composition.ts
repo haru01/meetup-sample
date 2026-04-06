@@ -4,16 +4,46 @@ import { PrismaCommunityRepository } from './repositories/prisma-community.repos
 import { PrismaCommunityMemberRepository } from './repositories/prisma-community-member.repository';
 import { PrismaEventRepository } from './repositories/prisma-event.repository';
 import { InMemoryEventBus } from '@shared/event-bus';
-import { CreateCommunityCommand } from './usecases/commands/create-community.command';
-import { JoinCommunityCommand } from './usecases/commands/join-community.command';
-import { LeaveCommunityCommand } from './usecases/commands/leave-community.command';
-import { ApproveMemberCommand } from './usecases/commands/approve-member.command';
-import { RejectMemberCommand } from './usecases/commands/reject-member.command';
-import { CreateEventCommand } from './usecases/commands/create-event.command';
-import { GetCommunityQuery } from './usecases/queries/get-community.query';
-import { ListCommunitiesQuery } from './usecases/queries/list-communities.query';
-import { ListMembersQuery } from './usecases/queries/list-members.query';
-import { ListMembersReadQuery } from './usecases/queries/list-members-read.query';
+import {
+  createCreateCommunityCommand,
+  type CreateCommunityCommand,
+} from './usecases/commands/create-community.command';
+import {
+  createJoinCommunityCommand,
+  type JoinCommunityCommand,
+} from './usecases/commands/join-community.command';
+import {
+  createLeaveCommunityCommand,
+  type LeaveCommunityCommand,
+} from './usecases/commands/leave-community.command';
+import {
+  createApproveMemberCommand,
+  type ApproveMemberCommand,
+} from './usecases/commands/approve-member.command';
+import {
+  createRejectMemberCommand,
+  type RejectMemberCommand,
+} from './usecases/commands/reject-member.command';
+import {
+  createCreateEventCommand,
+  type CreateEventCommand,
+} from './usecases/commands/create-event.command';
+import {
+  createGetCommunityQuery,
+  type GetCommunityQuery,
+} from './usecases/queries/get-community.query';
+import {
+  createListCommunitiesQuery,
+  type ListCommunitiesQuery,
+} from './usecases/queries/list-communities.query';
+import {
+  createListMembersQuery,
+  type ListMembersQuery,
+} from './usecases/queries/list-members.query';
+import {
+  createListMembersReadQuery,
+  type ListMembersReadQuery,
+} from './usecases/queries/list-members-read.query';
 import { CommunityMemberRole } from './models/schemas/member.schema';
 import { createRequireCommunityRole } from '@shared/middleware/community-role.middleware';
 import type { CommunityCreatedEvent } from './errors/community-errors';
@@ -57,30 +87,33 @@ export function createCommunityDependencies(prisma: PrismaClient): {
 
   return {
     community: {
-      createCommunityCommand: new CreateCommunityCommand(
+      createCommunityCommand: createCreateCommunityCommand(
         communityRepository,
         communityMemberRepository,
         eventBus
       ),
-      getCommunityQuery: new GetCommunityQuery(communityRepository, communityMemberRepository),
-      listCommunitiesQuery: new ListCommunitiesQuery(communityRepository),
+      getCommunityQuery: createGetCommunityQuery(communityRepository, communityMemberRepository),
+      listCommunitiesQuery: createListCommunitiesQuery(communityRepository),
     },
     member: {
-      joinCommunityCommand: new JoinCommunityCommand(
+      joinCommunityCommand: createJoinCommunityCommand(
         communityRepository,
         communityMemberRepository
       ),
-      leaveCommunityCommand: new LeaveCommunityCommand(
+      leaveCommunityCommand: createLeaveCommunityCommand(
         communityRepository,
         communityMemberRepository
       ),
-      listMembersQuery: new ListMembersQuery(communityRepository, communityMemberRepository),
-      approveMemberCommand: new ApproveMemberCommand(
+      listMembersQuery: createListMembersQuery(communityRepository, communityMemberRepository),
+      approveMemberCommand: createApproveMemberCommand(
         communityRepository,
         communityMemberRepository
       ),
-      rejectMemberCommand: new RejectMemberCommand(communityRepository, communityMemberRepository),
-      listMembersReadQuery: new ListMembersReadQuery(prisma),
+      rejectMemberCommand: createRejectMemberCommand(
+        communityRepository,
+        communityMemberRepository
+      ),
+      listMembersReadQuery: createListMembersReadQuery(prisma),
       requireCommunityRole: createRequireCommunityRole(
         communityMemberRepository,
         CommunityMemberRole.OWNER,
@@ -88,7 +121,7 @@ export function createCommunityDependencies(prisma: PrismaClient): {
       ),
     },
     event: {
-      createEventCommand: new CreateEventCommand(
+      createEventCommand: createCreateEventCommand(
         communityRepository,
         new PrismaEventRepository(prisma)
       ),

@@ -67,7 +67,7 @@ export function createEventRouter(deps: EventDependencies): Router {
         updatedAt: now,
       };
 
-      const result = await createEventCommand.execute(command);
+      const result = await createEventCommand(command);
 
       if (!result.ok) {
         const { status, response } = mapCreateEventErrorToResponse(result.error);

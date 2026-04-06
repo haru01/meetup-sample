@@ -23,28 +23,30 @@ export interface RejectMemberInput {
  * メンバーレコードを削除する。
  * 権限チェックはミドルウェアで実施済みのため、ここでは行わない。
  */
-export class RejectMemberCommand {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository
-  ) {}
+export type RejectMemberCommand = (
+  command: RejectMemberInput
+) => Promise<Result<void, RejectMemberError>>;
 
-  async execute(command: RejectMemberInput): Promise<Result<void, RejectMemberError>> {
+export function createRejectMemberCommand(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository
+): RejectMemberCommand {
+  return async (command) => {
     // コミュニティ存在チェック
-    const community = await this.communityRepository.findById(command.communityId);
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
 
     // 対象メンバー取得
-    const targetMember = await this.communityMemberRepository.findById(command.targetMemberId);
+    const targetMember = await communityMemberRepository.findById(command.targetMemberId);
     if (!targetMember) {
       return err({ type: 'MemberNotFound' });
     }
 
     // メンバーレコードを削除
-    await this.communityMemberRepository.delete(targetMember.id);
+    await communityMemberRepository.delete(targetMember.id);
 
     return ok(undefined);
-  }
+  };
 }

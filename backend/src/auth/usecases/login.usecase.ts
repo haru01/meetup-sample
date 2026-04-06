@@ -34,33 +34,28 @@ export interface LoginResult {
  *
  * メールアドレスとパスワードを検証し、JWTトークンを発行する。
  */
-export class LoginUseCase {
-  constructor(
-    private readonly accountRepository: AccountRepository,
-    private readonly passwordHasher: PasswordHasher,
-    private readonly tokenService: TokenService
-  ) {}
+export type LoginUseCase = (command: LoginCommand) => Promise<Result<LoginResult, LoginError>>;
 
-  /**
-   * ログインを実行する
-   * @param command ログインコマンド
-   * @returns トークン結果、またはエラー
-   */
-  async execute(command: LoginCommand): Promise<Result<LoginResult, LoginError>> {
+export function createLoginUseCase(
+  accountRepository: AccountRepository,
+  passwordHasher: PasswordHasher,
+  tokenService: TokenService
+): LoginUseCase {
+  return async (command) => {
     // メールアドレスでアカウント検索
-    const account = await this.accountRepository.findByEmail(command.email);
+    const account = await accountRepository.findByEmail(command.email);
     if (!account) {
       return err({ type: 'InvalidCredentials' });
     }
 
     // パスワード検証
-    const isValid = await this.passwordHasher.verify(command.password, account.passwordHash);
+    const isValid = await passwordHasher.verify(command.password, account.passwordHash);
     if (!isValid) {
       return err({ type: 'InvalidCredentials' });
     }
 
     // JWTトークン生成
-    const token = this.tokenService.generate({ accountId: account.id });
+    const token = tokenService.generate({ accountId: account.id });
 
     return ok({
       token,
@@ -71,5 +66,5 @@ export class LoginUseCase {
         createdAt: account.createdAt,
       },
     });
-  }
+  };
 }

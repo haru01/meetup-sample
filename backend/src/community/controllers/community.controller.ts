@@ -60,7 +60,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       updatedAt: now,
     };
 
-    const result = await createCommunityCommand.execute(command);
+    const result = await createCommunityCommand(command);
 
     if (!result.ok) {
       const { status, response } = mapCreateCommunityErrorToResponse(result.error);
@@ -96,7 +96,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       offset,
     };
 
-    const result = await listCommunitiesQuery.execute(command);
+    const result = await listCommunitiesQuery(command);
 
     if (!result.ok) {
       res.status(500).json({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
@@ -118,7 +118,7 @@ export function createCommunityRouter(deps: CommunityDependencies): Router {
       requestingAccountId: req.accountId as AccountId | undefined,
     };
 
-    const result = await getCommunityQuery.execute(command);
+    const result = await getCommunityQuery(command);
 
     if (!result.ok) {
       const { status, response } = mapGetCommunityErrorToResponse(result.error);

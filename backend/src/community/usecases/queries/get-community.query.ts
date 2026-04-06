@@ -23,14 +23,16 @@ export interface GetCommunityInput {
  *
  * PUBLIC は誰でも閲覧可能。PRIVATE はメンバーのみ閲覧可能。
  */
-export class GetCommunityQuery {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository
-  ) {}
+export type GetCommunityQuery = (
+  command: GetCommunityInput
+) => Promise<Result<Community, GetCommunityError>>;
 
-  async execute(command: GetCommunityInput): Promise<Result<Community, GetCommunityError>> {
-    const community = await this.communityRepository.findById(command.communityId);
+export function createGetCommunityQuery(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository
+): GetCommunityQuery {
+  return async (command) => {
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
@@ -45,7 +47,7 @@ export class GetCommunityQuery {
       return err({ type: 'CommunityNotFound' });
     }
 
-    const member = await this.communityMemberRepository.findByIds(
+    const member = await communityMemberRepository.findByIds(
       community.id,
       command.requestingAccountId
     );
@@ -55,5 +57,5 @@ export class GetCommunityQuery {
     }
 
     return ok(community);
-  }
+  };
 }

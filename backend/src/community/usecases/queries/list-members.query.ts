@@ -29,24 +29,26 @@ export type ListMembersResult = {
  *
  * コミュニティのメンバー一覧をページネーションで返す。
  */
-export class ListMembersQuery {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository
-  ) {}
+export type ListMembersQuery = (
+  command: ListMembersInput
+) => Promise<Result<ListMembersResult, ListMembersError>>;
 
-  async execute(command: ListMembersInput): Promise<Result<ListMembersResult, ListMembersError>> {
+export function createListMembersQuery(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository
+): ListMembersQuery {
+  return async (command) => {
     // コミュニティ存在チェック
-    const community = await this.communityRepository.findById(command.communityId);
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
 
-    const { members, total } = await this.communityMemberRepository.findByCommunityId(
+    const { members, total } = await communityMemberRepository.findByCommunityId(
       command.communityId,
       { limit: command.limit, offset: command.offset }
     );
 
     return ok({ members, total });
-  }
+  };
 }

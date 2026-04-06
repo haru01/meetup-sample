@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ListMembersQuery } from '../list-members.query';
+import { createListMembersQuery } from '../list-members.query';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -63,17 +63,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('ListMembersQuery', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: ListMembersQuery;
+  let useCase: ReturnType<typeof createListMembersQuery>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new ListMembersQuery(communityRepo, memberRepo);
+    useCase = createListMembersQuery(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('コミュニティメンバー一覧を返す', async () => {
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         limit: 10,
         offset: 0,
@@ -87,7 +87,7 @@ describe('ListMembersQuery', () => {
     });
 
     it('ページネーションパラメータをリポジトリに渡す', async () => {
-      await useCase.execute({
+      await useCase({
         communityId: community.id,
         limit: 5,
         offset: 10,
@@ -104,7 +104,7 @@ describe('ListMembersQuery', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
         limit: 10,
         offset: 0,
