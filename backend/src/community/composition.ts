@@ -40,6 +40,7 @@ export interface MemberDependencies {
   readonly approveMemberCommand: ApproveMemberCommand;
   readonly rejectMemberCommand: RejectMemberCommand;
   readonly listMembersReadQuery: ListMembersReadQuery;
+  readonly requireCommunityRole: RequestHandler;
 }
 
 /**
@@ -80,6 +81,11 @@ export function createCommunityDependencies(prisma: PrismaClient): {
       ),
       rejectMemberCommand: new RejectMemberCommand(communityRepository, communityMemberRepository),
       listMembersReadQuery: new ListMembersReadQuery(prisma),
+      requireCommunityRole: createRequireCommunityRole(
+        communityMemberRepository,
+        CommunityMemberRole.OWNER,
+        CommunityMemberRole.ADMIN
+      ),
     },
     event: {
       createEventCommand: new CreateEventCommand(

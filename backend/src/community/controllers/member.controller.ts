@@ -47,6 +47,7 @@ export function createMemberRouter(deps: MemberDependencies): Router {
     approveMemberCommand,
     rejectMemberCommand,
     listMembersReadQuery,
+    requireCommunityRole,
   } = deps;
 
   /**
@@ -152,14 +153,13 @@ export function createMemberRouter(deps: MemberDependencies): Router {
   router.patch(
     '/:memberId/approve',
     requireAuth,
+    requireCommunityRole,
     async (req: Request, res: Response): Promise<void> => {
       const communityId = req.params['id'] as CommunityId;
-      const requesterAccountId = req.accountId as AccountId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
       const result = await approveMemberCommand.execute({
         communityId,
-        requesterAccountId,
         targetMemberId,
       });
 
@@ -179,14 +179,13 @@ export function createMemberRouter(deps: MemberDependencies): Router {
   router.patch(
     '/:memberId/reject',
     requireAuth,
+    requireCommunityRole,
     async (req: Request, res: Response): Promise<void> => {
       const communityId = req.params['id'] as CommunityId;
-      const requesterAccountId = req.accountId as AccountId;
       const targetMemberId = req.params['memberId'] as CommunityMemberId;
 
       const result = await rejectMemberCommand.execute({
         communityId,
-        requesterAccountId,
         targetMemberId,
       });
 

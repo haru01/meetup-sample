@@ -356,7 +356,7 @@ describe('PATCH /communities/:id/members/:memberId/approve — メンバー承�
         .set('Authorization', `Bearer ${member1.token}`)
         .expect(403);
 
-      expect(res.body.code).toBe('NOT_AUTHORIZED');
+      expect(res.body.code).toBe('FORBIDDEN');
     });
   });
 
@@ -446,7 +446,7 @@ describe('PATCH /communities/:id/members/:memberId/reject — メンバー拒否
         .set('Authorization', `Bearer ${member1.token}`)
         .expect(403);
 
-      expect(res.body.code).toBe('NOT_AUTHORIZED');
+      expect(res.body.code).toBe('FORBIDDEN');
     });
   });
 

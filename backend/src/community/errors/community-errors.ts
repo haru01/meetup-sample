@@ -30,16 +30,12 @@ export type LeaveCommunityError =
 export type ApproveMemberError =
   | { type: 'CommunityNotFound' }
   | { type: 'MemberNotFound' }
-  | { type: 'NotAuthorized' }
   | { type: 'MemberAlreadyActive' };
 
 /**
  * メンバー拒否エラー
  */
-export type RejectMemberError =
-  | { type: 'CommunityNotFound' }
-  | { type: 'MemberNotFound' }
-  | { type: 'NotAuthorized' };
+export type RejectMemberError = { type: 'CommunityNotFound' } | { type: 'MemberNotFound' };
 
 /**
  * コミュニティ取得エラー
