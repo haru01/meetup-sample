@@ -161,7 +161,7 @@ Issueが「完了」となるための条件:
 
 ## Phase 3: イベント管理（community コンテキスト）
 
-> **Note**: MTP-010 はチュートリアル題材として実装対象。MTP-011〜015 は未実装。
+> **Note**: MTP-010 はチュートリアル題材として実装済み。MTP-011〜015 は未実装。
 
 ### MTP-010: イベント作成
 
@@ -171,23 +171,23 @@ Issueが「完了」となるための条件:
 **受け入れ条件**
 
 #### API（Backend）
-- [ ] `POST /communities/:communityId/events` でイベントを作成できる
-- [ ] タイトル（1〜100文字）、説明（最大1000文字）、開催日時、終了日時、開催形式（ONLINE / OFFLINE / HYBRID）、定員（1〜1000）を指定できる
-- [ ] 開始日時は現在時刻より未来でなければならない（`EventDateInPast` エラー）
-- [ ] 終了日時は開始日時より後でなければならない（`EventEndBeforeStart` エラー）
-- [ ] 作成直後のイベント状態は `DRAFT` である
-- [ ] オーナーまたは管理者のみ作成可能（`NotAuthorized` エラー）
-- [ ] 存在しないコミュニティは `CommunityNotFound` エラー
+- [x] `POST /communities/:communityId/events` でイベントを作成できる
+- [x] タイトル（1〜100文字）、説明（最大1000文字）、開催日時、終了日時、開催形式（ONLINE / OFFLINE / HYBRID）、定員（1〜1000）を指定できる
+- [x] 開始日時は現在時刻より未来でなければならない（`EventDateInPast` エラー）
+- [x] 終了日時は開始日時より後でなければならない（`EventEndBeforeStart` エラー）
+- [x] 作成直後のイベント状態は `DRAFT` である
+- [x] オーナーまたは管理者のみ作成可能（`NotAuthorized` エラー）
+- [x] 存在しないコミュニティは `CommunityNotFound` エラー
 
 #### UI（Frontend）
-- [ ] コミュニティ詳細ページに「イベント作成」ボタンを表示する（オーナー/管理者のみ）
-- [ ] イベント作成フォーム（タイトル、説明、開催日時、終了日時、開催形式、定員）を表示する
-- [ ] バリデーションエラー時にエラーメッセージを表示する
-- [ ] 作成成功時にコミュニティ詳細ページへ遷移する
+- [x] コミュニティ詳細ページに「イベント作成」ボタンを表示する（オーナー/管理者のみ）
+- [x] イベント作成フォーム（タイトル、説明、開催日時、終了日時、開催形式、定員）を表示する
+- [x] バリデーションエラー時にエラーメッセージを表示する
+- [x] 作成成功時にコミュニティ詳細ページへ遷移する
 
 #### E2E
-- [ ] オーナーがイベント作成フォームを入力し、作成が成功する一連のフローを確認する
-- [ ] 権限のないメンバーには「イベント作成」ボタンが表示されないことを確認する
+- [x] オーナーがイベント作成フォームを入力し、作成が成功する一連のフローを確認する
+- [x] 権限のないメンバーには「イベント作成」ボタンが表示されないことを確認する
 
 ### MTP-011: イベント公開
 
@@ -569,16 +569,21 @@ export type ListMembersError =
 export type ListCommunitiesError = never;
 ```
 
-### 未実装（event / participation / notification）
+### 実装済み（event）
 
 ```typescript
-// Phase 3: イベント管理
+// src/community/errors/event-errors.ts
 export type CreateEventError =
   | { type: 'CommunityNotFound' }
   | { type: 'NotAuthorized' }
   | { type: 'EventDateInPast' }
   | { type: 'EventEndBeforeStart' };
+```
 
+### 未実装（event 残り / participation / notification）
+
+```typescript
+// Phase 3: イベント管理（残り）
 export type PublishEventError =
   | { type: 'EventNotFound' }
   | { type: 'NotAuthorized' }
@@ -663,7 +668,7 @@ Waitlist:
 ```text
 Phase 1（登録・認証）  ← 最小限実装済み
   └─ Phase 2（コミュニティ管理）  ← 実装済み
-       └─ Phase 3（イベント管理 / community コンテキスト）  ← 未実装
+       └─ Phase 3（イベント管理 / community コンテキスト）  ← MTP-010 実装済み、MTP-011〜015 未実装
             └─ Phase 4（イベント参加申込 / participation コンテキスト）  ← 未実装
   └─ Phase 5（検索・レコメンド）  ← 未実装
   └─ Phase 6（通知）  ← 未実装
@@ -684,7 +689,7 @@ Phase 1（登録・認証）  ← 最小限実装済み
 | 2 | MTP-007 承認・拒否 | :white_check_mark: 実装済み |
 | 2 | MTP-008 詳細取得 | :white_check_mark: 実装済み |
 | 2 | MTP-009 一覧・検索 | :white_check_mark: 実装済み（キーワード検索除く） |
-| 3 | MTP-010 イベント作成（フルスタック） | :black_square_button: 未実装（チュートリアル題材） |
+| 3 | MTP-010 イベント作成（フルスタック） | :white_check_mark: 実装済み（チュートリアル題材） |
 | 3 | MTP-011 イベント公開 | :black_square_button: 未実装 |
 | 3 | MTP-012 イベント更新 | :black_square_button: 未実装 |
 | 3 | MTP-013 イベントキャンセル | :black_square_button: 未実装 |
