@@ -1,16 +1,21 @@
 import type { PrismaClient } from '@prisma/client';
+import type { RequestHandler } from 'express';
 import { PrismaCommunityRepository } from './repositories/prisma-community.repository';
 import { PrismaCommunityMemberRepository } from './repositories/prisma-community-member.repository';
+import { PrismaEventRepository } from './repositories/prisma-event.repository';
 import { InMemoryEventBus } from '@shared/event-bus';
 import { CreateCommunityCommand } from './usecases/commands/create-community.command';
 import { JoinCommunityCommand } from './usecases/commands/join-community.command';
 import { LeaveCommunityCommand } from './usecases/commands/leave-community.command';
 import { ApproveMemberCommand } from './usecases/commands/approve-member.command';
 import { RejectMemberCommand } from './usecases/commands/reject-member.command';
+import { CreateEventCommand } from './usecases/commands/create-event.command';
 import { GetCommunityQuery } from './usecases/queries/get-community.query';
 import { ListCommunitiesQuery } from './usecases/queries/list-communities.query';
 import { ListMembersQuery } from './usecases/queries/list-members.query';
 import { ListMembersReadQuery } from './usecases/queries/list-members-read.query';
+import { CommunityMemberRole } from './models/schemas/member.schema';
+import { createRequireCommunityRole } from '@shared/middleware/community-role.middleware';
 import type { CommunityCreatedEvent } from './errors/community-errors';
 
 // ============================================================
@@ -21,6 +26,11 @@ export interface CommunityDependencies {
   readonly createCommunityCommand: CreateCommunityCommand;
   readonly getCommunityQuery: GetCommunityQuery;
   readonly listCommunitiesQuery: ListCommunitiesQuery;
+}
+
+export interface EventDependencies {
+  readonly createEventCommand: CreateEventCommand;
+  readonly requireCommunityRole: RequestHandler;
 }
 
 export interface MemberDependencies {
@@ -38,6 +48,7 @@ export interface MemberDependencies {
 export function createCommunityDependencies(prisma: PrismaClient): {
   community: CommunityDependencies;
   member: MemberDependencies;
+  event: EventDependencies;
 } {
   const communityRepository = new PrismaCommunityRepository(prisma);
   const communityMemberRepository = new PrismaCommunityMemberRepository(prisma);
@@ -69,6 +80,17 @@ export function createCommunityDependencies(prisma: PrismaClient): {
       ),
       rejectMemberCommand: new RejectMemberCommand(communityRepository, communityMemberRepository),
       listMembersReadQuery: new ListMembersReadQuery(prisma),
+    },
+    event: {
+      createEventCommand: new CreateEventCommand(
+        communityRepository,
+        new PrismaEventRepository(prisma)
+      ),
+      requireCommunityRole: createRequireCommunityRole(
+        communityMemberRepository,
+        CommunityMemberRole.OWNER,
+        CommunityMemberRole.ADMIN
+      ),
     },
   };
 }
