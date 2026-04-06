@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RejectMemberCommand } from '../reject-member.command';
+import { createRejectMemberCommand } from '../reject-member.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -56,17 +56,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('RejectMemberCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: RejectMemberCommand;
+  let useCase: ReturnType<typeof createRejectMemberCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new RejectMemberCommand(communityRepo, memberRepo);
+    useCase = createRejectMemberCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('PENDINGメンバーを拒否するとメンバーレコードを削除する', async () => {
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         targetMemberId,
       });
@@ -80,7 +80,7 @@ describe('RejectMemberCommand', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
         targetMemberId,
       });
@@ -94,7 +94,7 @@ describe('RejectMemberCommand', () => {
     it('対象メンバーが存在しない場合はMemberNotFoundエラーを返す', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         targetMemberId: createCommunityMemberId('non-existent'),
       });

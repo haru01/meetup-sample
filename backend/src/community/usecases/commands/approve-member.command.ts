@@ -25,21 +25,23 @@ export interface ApproveMemberInput {
  * PENDING → ACTIVE に遷移する。
  * 権限チェックはミドルウェアで実施済みのため、ここでは行わない。
  */
-export class ApproveMemberCommand {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository
-  ) {}
+export type ApproveMemberCommand = (
+  command: ApproveMemberInput
+) => Promise<Result<CommunityMember, ApproveMemberError>>;
 
-  async execute(command: ApproveMemberInput): Promise<Result<CommunityMember, ApproveMemberError>> {
+export function createApproveMemberCommand(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository
+): ApproveMemberCommand {
+  return async (command) => {
     // コミュニティ存在チェック
-    const community = await this.communityRepository.findById(command.communityId);
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
 
     // 対象メンバー取得
-    const targetMember = await this.communityMemberRepository.findById(command.targetMemberId);
+    const targetMember = await communityMemberRepository.findById(command.targetMemberId);
     if (!targetMember) {
       return err({ type: 'MemberNotFound' });
     }
@@ -51,8 +53,8 @@ export class ApproveMemberCommand {
     }
 
     // 保存
-    await this.communityMemberRepository.save(approveResult.value);
+    await communityMemberRepository.save(approveResult.value);
 
     return ok(approveResult.value);
-  }
+  };
 }

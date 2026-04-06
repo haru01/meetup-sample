@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CreateEventCommand } from '../create-event.command';
+import { createCreateEventCommand } from '../create-event.command';
 import type { CreateEventInput } from '../create-event.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { EventRepository } from '../../../repositories/event.repository';
@@ -46,18 +46,18 @@ const makeEventRepository = (): EventRepository => ({
 describe('CreateEventCommand', () => {
   let communityRepo: CommunityRepository;
   let eventRepo: EventRepository;
-  let useCase: CreateEventCommand;
+  let useCase: ReturnType<typeof createCreateEventCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     eventRepo = makeEventRepository();
-    useCase = new CreateEventCommand(communityRepo, eventRepo);
+    useCase = createCreateEventCommand(communityRepo, eventRepo);
   });
 
   describe('正常系', () => {
     it('イベントを作成し保存する', async () => {
       const cmd = makeCommand();
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.value.id).toBe(cmd.id);
@@ -69,7 +69,7 @@ describe('CreateEventCommand', () => {
 
     it('イベントをリポジトリに保存する', async () => {
       const cmd = makeCommand();
-      await useCase.execute(cmd);
+      await useCase(cmd);
       expect(eventRepo.save).toHaveBeenCalledTimes(1);
     });
   });
@@ -78,7 +78,7 @@ describe('CreateEventCommand', () => {
     it('コミュニティが存在しない場合は CommunityNotFound エラーを返す', async () => {
       const cmd = makeCommand();
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe('CommunityNotFound');
@@ -87,7 +87,7 @@ describe('CreateEventCommand', () => {
 
     it('開始日時が過去の場合は EventDateInPast エラーを返す', async () => {
       const cmd = { ...makeCommand(), startsAt: new Date('2025-01-01T00:00:00Z') };
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe('EventDateInPast');
@@ -96,7 +96,7 @@ describe('CreateEventCommand', () => {
 
     it('終了日時が開始日時以前の場合は EventEndBeforeStart エラーを返す', async () => {
       const cmd = { ...makeCommand(), endsAt: new Date('2026-06-01T09:00:00Z') };
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe('EventEndBeforeStart');

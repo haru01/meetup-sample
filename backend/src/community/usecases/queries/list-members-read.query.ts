@@ -36,16 +36,16 @@ export type ListMembersReadResult = {
   readonly total: number;
 };
 
-export class ListMembersReadQuery {
-  constructor(private readonly prisma: PrismaClient) {}
+export type ListMembersReadQuery = (
+  command: ListMembersReadInput
+) => Promise<Result<ListMembersReadResult, ListMembersError>>;
 
-  async execute(
-    command: ListMembersReadInput
-  ): Promise<Result<ListMembersReadResult, ListMembersError>> {
+export function createListMembersReadQuery(prisma: PrismaClient): ListMembersReadQuery {
+  return async (command) => {
     const memberWhere = { communityId: command.communityId, status: 'ACTIVE' as const };
 
-    const [community, total] = await this.prisma.$transaction([
-      this.prisma.community.findUnique({
+    const [community, total] = await prisma.$transaction([
+      prisma.community.findUnique({
         where: { id: command.communityId },
         include: {
           members: {
@@ -57,7 +57,7 @@ export class ListMembersReadQuery {
           },
         },
       }),
-      this.prisma.communityMember.count({ where: memberWhere }),
+      prisma.communityMember.count({ where: memberWhere }),
     ]);
 
     if (!community) {
@@ -76,5 +76,5 @@ export class ListMembersReadQuery {
       })),
       total,
     });
-  }
+  };
 }

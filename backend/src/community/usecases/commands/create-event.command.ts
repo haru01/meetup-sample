@@ -41,15 +41,17 @@ export interface CreateEventInput {
  * コミュニティ存在チェック後、ファクトリでイベントを生成し保存する。
  * 権限チェックはミドルウェアで実施済みのため、ここでは行わない。
  */
-export class CreateEventCommand {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly eventRepository: EventRepository
-  ) {}
+export type CreateEventCommand = (
+  command: CreateEventInput
+) => Promise<Result<Event, CreateEventError>>;
 
-  async execute(command: CreateEventInput): Promise<Result<Event, CreateEventError>> {
+export function createCreateEventCommand(
+  communityRepository: CommunityRepository,
+  eventRepository: EventRepository
+): CreateEventCommand {
+  return async (command) => {
     // コミュニティ存在チェック
-    const community = await this.communityRepository.findById(command.communityId);
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
@@ -74,8 +76,8 @@ export class CreateEventCommand {
     const event = createResult.value;
 
     // リポジトリに保存
-    await this.eventRepository.save(event);
+    await eventRepository.save(event);
 
     return ok(event);
-  }
+  };
 }

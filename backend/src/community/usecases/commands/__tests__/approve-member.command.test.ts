@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ApproveMemberCommand } from '../approve-member.command';
+import { createApproveMemberCommand } from '../approve-member.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -66,17 +66,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('ApproveMemberCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: ApproveMemberCommand;
+  let useCase: ReturnType<typeof createApproveMemberCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new ApproveMemberCommand(communityRepo, memberRepo);
+    useCase = createApproveMemberCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('PENDINGメンバーを承認するとACTIVEになる', async () => {
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         targetMemberId,
       });
@@ -88,7 +88,7 @@ describe('ApproveMemberCommand', () => {
     });
 
     it('承認したメンバーをリポジトリに保存する', async () => {
-      await useCase.execute({
+      await useCase({
         communityId: community.id,
         targetMemberId,
       });
@@ -101,7 +101,7 @@ describe('ApproveMemberCommand', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
         targetMemberId,
       });
@@ -115,7 +115,7 @@ describe('ApproveMemberCommand', () => {
     it('対象メンバーが存在しない場合はMemberNotFoundエラーを返す', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         targetMemberId: createCommunityMemberId('non-existent'),
       });
@@ -129,7 +129,7 @@ describe('ApproveMemberCommand', () => {
     it('すでにACTIVEなメンバーを承認するとMemberAlreadyActiveエラーを返す', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(activeMember);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         targetMemberId,
       });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CreateCommunityCommand } from '../create-community.command';
+import { createCreateCommunityCommand } from '../create-community.command';
 import type { CreateCommunityInput } from '../create-community.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
@@ -49,20 +49,20 @@ describe('CreateCommunityCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
   let eventBus: InMemoryEventBus<CommunityCreatedEvent>;
-  let useCase: CreateCommunityCommand;
+  let useCase: ReturnType<typeof createCreateCommunityCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
     eventBus = new InMemoryEventBus<CommunityCreatedEvent>();
-    useCase = new CreateCommunityCommand(communityRepo, memberRepo, eventBus);
+    useCase = createCreateCommunityCommand(communityRepo, memberRepo, eventBus);
   });
 
   describe('正常系', () => {
     it('コミュニティとオーナーメンバーを作成し保存する', async () => {
       const cmd = makeCommand();
 
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
 
       expect(result.ok).toBe(true);
       if (result.ok) {
@@ -77,7 +77,7 @@ describe('CreateCommunityCommand', () => {
     it('コミュニティとオーナーメンバーをリポジトリに保存する', async () => {
       const cmd = makeCommand();
 
-      await useCase.execute(cmd);
+      await useCase(cmd);
 
       expect(communityRepo.save).toHaveBeenCalledTimes(1);
       expect(memberRepo.save).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe('CreateCommunityCommand', () => {
       const handler = vi.fn();
       eventBus.subscribe('CommunityCreated', handler);
 
-      await useCase.execute(cmd);
+      await useCase(cmd);
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(
@@ -116,7 +116,7 @@ describe('CreateCommunityCommand', () => {
       };
       vi.mocked(communityRepo.findByName).mockResolvedValue(existing);
 
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -131,7 +131,7 @@ describe('CreateCommunityCommand', () => {
       const cmd = makeCommand();
       vi.mocked(communityRepo.countByOwnerAccountId).mockResolvedValue(10);
 
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -143,7 +143,7 @@ describe('CreateCommunityCommand', () => {
       const cmd = makeCommand();
       vi.mocked(communityRepo.countByOwnerAccountId).mockResolvedValue(9);
 
-      const result = await useCase.execute(cmd);
+      const result = await useCase(cmd);
 
       expect(result.ok).toBe(true);
     });

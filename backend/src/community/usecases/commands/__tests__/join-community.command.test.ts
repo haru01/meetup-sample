@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JoinCommunityCommand } from '../join-community.command';
+import { createJoinCommunityCommand } from '../join-community.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -67,17 +67,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('JoinCommunityCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: JoinCommunityCommand;
+  let useCase: ReturnType<typeof createJoinCommunityCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new JoinCommunityCommand(communityRepo, memberRepo);
+    useCase = createJoinCommunityCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('PUBLICコミュニティに参加するとACTIVEメンバーになる', async () => {
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: publicCommunity.id,
         accountId,
         memberId,
@@ -94,7 +94,7 @@ describe('JoinCommunityCommand', () => {
     it('PRIVATEコミュニティに参加するとPENDINGメンバーになる', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(privateCommunity);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: privateCommunity.id,
         accountId,
         memberId,
@@ -107,7 +107,7 @@ describe('JoinCommunityCommand', () => {
     });
 
     it('参加したメンバーをリポジトリに保存する', async () => {
-      await useCase.execute({
+      await useCase({
         communityId: publicCommunity.id,
         accountId,
         memberId,
@@ -121,7 +121,7 @@ describe('JoinCommunityCommand', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
         accountId,
         memberId,
@@ -136,7 +136,7 @@ describe('JoinCommunityCommand', () => {
     it('すでにメンバーの場合はAlreadyMemberエラーを返す', async () => {
       vi.mocked(memberRepo.findByIds).mockResolvedValue(existingMember);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: publicCommunity.id,
         accountId,
         memberId,

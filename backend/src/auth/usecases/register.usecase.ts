@@ -27,26 +27,23 @@ export interface RegisterCommand {
  * 重複チェック、パスワードハッシュ化、アカウント生成・永続化を調整する。
  * ドメインロジックは createAccount() に委譲。
  */
-export class RegisterUseCase {
-  constructor(
-    private readonly accountRepository: AccountRepository,
-    private readonly passwordHasher: PasswordHasher
-  ) {}
+export type RegisterUseCase = (
+  command: RegisterCommand
+) => Promise<Result<Account, RegisterAccountError>>;
 
-  /**
-   * アカウントを登録する
-   * @param command 登録コマンド（idとcreatedAtは呼び出し元が生成して渡す）
-   * @returns 作成されたアカウント、またはエラー
-   */
-  async execute(command: RegisterCommand): Promise<Result<Account, RegisterAccountError>> {
+export function createRegisterUseCase(
+  accountRepository: AccountRepository,
+  passwordHasher: PasswordHasher
+): RegisterUseCase {
+  return async (command) => {
     // メールアドレス重複チェック
-    const existing = await this.accountRepository.findByEmail(command.email);
+    const existing = await accountRepository.findByEmail(command.email);
     if (existing) {
       return err({ type: 'DuplicateEmail', email: command.email });
     }
 
     // パスワードハッシュ化
-    const passwordHash = await this.passwordHasher.hash(command.password);
+    const passwordHash = await passwordHasher.hash(command.password);
 
     // アカウント生成（ファクトリに委譲）
     const accountResult = createAccount({
@@ -62,8 +59,8 @@ export class RegisterUseCase {
     }
 
     // 永続化
-    await this.accountRepository.save(accountResult.value);
+    await accountRepository.save(accountResult.value);
 
     return ok(accountResult.value);
-  }
+  };
 }

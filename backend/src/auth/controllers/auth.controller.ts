@@ -43,7 +43,7 @@ export function createAuthRouter(deps: AuthDependencies): Router {
       password: req.body.password as string,
     };
 
-    const result = await registerUseCase.execute(command);
+    const result = await registerUseCase(command);
 
     if (!result.ok) {
       const { status, response } = mapRegisterAccountErrorToResponse(result.error);
@@ -65,7 +65,7 @@ export function createAuthRouter(deps: AuthDependencies): Router {
       password: req.body.password as string,
     };
 
-    const result = await loginUseCase.execute(command);
+    const result = await loginUseCase(command);
 
     if (!result.ok) {
       const { status, response } = mapLoginErrorToResponse(result.error);

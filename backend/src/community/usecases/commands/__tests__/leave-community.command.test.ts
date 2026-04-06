@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LeaveCommunityCommand } from '../leave-community.command';
+import { createLeaveCommunityCommand } from '../leave-community.command';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -66,17 +66,17 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('LeaveCommunityCommand', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: LeaveCommunityCommand;
+  let useCase: ReturnType<typeof createLeaveCommunityCommand>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new LeaveCommunityCommand(communityRepo, memberRepo);
+    useCase = createLeaveCommunityCommand(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('メンバーがコミュニティを脱退するとメンバーレコードを削除する', async () => {
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId,
       });
@@ -90,7 +90,7 @@ describe('LeaveCommunityCommand', () => {
     it('memberId が自分のメンバーの場合は正常に脱退する', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(activeMember);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId,
         memberId,
@@ -107,7 +107,7 @@ describe('LeaveCommunityCommand', () => {
         accountId: createAccountId('other-account'),
       });
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId,
         memberId,
@@ -122,7 +122,7 @@ describe('LeaveCommunityCommand', () => {
     it('memberId が存在しない場合は MemberNotFound を返す', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId,
         memberId: createCommunityMemberId('non-existent'),
@@ -139,7 +139,7 @@ describe('LeaveCommunityCommand', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
         accountId,
       });
@@ -153,7 +153,7 @@ describe('LeaveCommunityCommand', () => {
     it('メンバーが存在しない場合はMemberNotFoundエラーを返す', async () => {
       vi.mocked(memberRepo.findByIds).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId,
       });
@@ -167,7 +167,7 @@ describe('LeaveCommunityCommand', () => {
     it('オーナーが脱退しようとするとOwnerCannotLeaveエラーを返す', async () => {
       vi.mocked(memberRepo.findByIds).mockResolvedValue(ownerMember);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: community.id,
         accountId: ownerMember.accountId,
       });

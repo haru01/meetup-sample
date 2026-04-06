@@ -25,23 +25,23 @@ export interface JoinCommunityInput {
  *
  * PUBLIC → ACTIVE、PRIVATE → PENDING でメンバーを追加する。
  */
-export class JoinCommunityCommand {
-  constructor(
-    private readonly communityRepository: CommunityRepository,
-    private readonly communityMemberRepository: CommunityMemberRepository
-  ) {}
+export type JoinCommunityCommand = (
+  command: JoinCommunityInput
+) => Promise<Result<CommunityMember, JoinCommunityError>>;
 
-  async execute(
-    command: JoinCommunityInput
-  ): Promise<Result<CommunityMember, JoinCommunityError>> {
+export function createJoinCommunityCommand(
+  communityRepository: CommunityRepository,
+  communityMemberRepository: CommunityMemberRepository
+): JoinCommunityCommand {
+  return async (command) => {
     // コミュニティ存在チェック
-    const community = await this.communityRepository.findById(command.communityId);
+    const community = await communityRepository.findById(command.communityId);
     if (!community) {
       return err({ type: 'CommunityNotFound' });
     }
 
     // 既存メンバーチェック
-    const existingMember = await this.communityMemberRepository.findByIds(
+    const existingMember = await communityMemberRepository.findByIds(
       command.communityId,
       command.accountId
     );
@@ -60,8 +60,8 @@ export class JoinCommunityCommand {
     const member = memberResult.value;
 
     // リポジトリに保存
-    await this.communityMemberRepository.save(member);
+    await communityMemberRepository.save(member);
 
     return ok(member);
-  }
+  };
 }

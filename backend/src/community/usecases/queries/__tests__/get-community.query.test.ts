@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GetCommunityQuery } from '../get-community.query';
+import { createGetCommunityQuery } from '../get-community.query';
 import type { CommunityRepository } from '../../../repositories/community.repository';
 import type { CommunityMemberRepository } from '../../../repositories/community-member.repository';
 import type { Community } from '../../../models/community';
@@ -65,19 +65,19 @@ const makeMemberRepository = (): CommunityMemberRepository => ({
 describe('GetCommunityQuery', () => {
   let communityRepo: CommunityRepository;
   let memberRepo: CommunityMemberRepository;
-  let useCase: GetCommunityQuery;
+  let useCase: ReturnType<typeof createGetCommunityQuery>;
 
   beforeEach(() => {
     communityRepo = makeCommunityRepository();
     memberRepo = makeMemberRepository();
-    useCase = new GetCommunityQuery(communityRepo, memberRepo);
+    useCase = createGetCommunityQuery(communityRepo, memberRepo);
   });
 
   describe('正常系', () => {
     it('PUBLICコミュニティはrequestingAccountIdなしで取得できる', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(publicCommunity);
 
-      const result = await useCase.execute({ communityId: publicCommunity.id });
+      const result = await useCase({ communityId: publicCommunity.id });
 
       expect(result.ok).toBe(true);
       if (result.ok) {
@@ -88,7 +88,7 @@ describe('GetCommunityQuery', () => {
     it('PUBLICコミュニティはrequestingAccountIdありでも取得できる', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(publicCommunity);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: publicCommunity.id,
         requestingAccountId: accountId,
       });
@@ -100,7 +100,7 @@ describe('GetCommunityQuery', () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(privateCommunity);
       vi.mocked(memberRepo.findByIds).mockResolvedValue(memberRecord);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: privateCommunity.id,
         requestingAccountId: accountId,
       });
@@ -116,7 +116,7 @@ describe('GetCommunityQuery', () => {
     it('コミュニティが存在しない場合はCommunityNotFoundエラーを返す', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: createCommunityId('non-existent'),
       });
 
@@ -129,7 +129,7 @@ describe('GetCommunityQuery', () => {
     it('PRIVATEコミュニティはrequestingAccountIdなしで取得できない', async () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(privateCommunity);
 
-      const result = await useCase.execute({ communityId: privateCommunity.id });
+      const result = await useCase({ communityId: privateCommunity.id });
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -141,7 +141,7 @@ describe('GetCommunityQuery', () => {
       vi.mocked(communityRepo.findById).mockResolvedValue(privateCommunity);
       vi.mocked(memberRepo.findByIds).mockResolvedValue(null);
 
-      const result = await useCase.execute({
+      const result = await useCase({
         communityId: privateCommunity.id,
         requestingAccountId: createAccountId('other-account'),
       });
