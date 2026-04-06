@@ -7,6 +7,7 @@ import { CommunityListPage } from "./community/pages/CommunityListPage";
 import { CommunityDetailPage } from "./community/pages/CommunityDetailPage";
 import { CommunityCreatePage } from "./community/pages/CommunityCreatePage";
 import { MyCommunitiesPage } from "./community/pages/MyCommunitiesPage";
+import { EventCreatePage } from "./community/pages/EventCreatePage";
 
 export function App() {
   return (
@@ -18,6 +19,10 @@ export function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/communities/new" element={<CommunityCreatePage />} />
+            <Route
+              path="/communities/:id/events/new"
+              element={<EventCreatePage />}
+            />
             <Route path="/communities/:id" element={<CommunityDetailPage />} />
             <Route path="/my-communities" element={<MyCommunitiesPage />} />
           </Routes>

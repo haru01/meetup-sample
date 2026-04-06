@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCommunities } from "../hooks/useCommunities";
 import { useMembers } from "../hooks/useMembers";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -11,6 +11,7 @@ import { MemberCard } from "../components/MemberCard";
 
 export const CommunityDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const {
     community,
     loading: communityLoading,
@@ -43,6 +44,10 @@ export const CommunityDetailPage = () => {
   const isOwner = members.some(
     (m) => m.accountId === user?.id && m.role === "OWNER",
   );
+  const isAdmin = members.some(
+    (m) => m.accountId === user?.id && m.role === "ADMIN",
+  );
+  const canManageEvents = isOwner || isAdmin;
   const currentMember = members.find((m) => m.accountId === user?.id);
 
   const handleJoin = async () => {
@@ -85,6 +90,14 @@ export const CommunityDetailPage = () => {
         {isAuthenticated && currentMember && !isOwner && (
           <Button onClick={handleLeave} variant="danger" className="mt-4">
             退会する
+          </Button>
+        )}
+        {canManageEvents && (
+          <Button
+            onClick={() => navigate(`/communities/${id}/events/new`)}
+            className="mt-4 ml-2"
+          >
+            イベント作成
           </Button>
         )}
       </Card>

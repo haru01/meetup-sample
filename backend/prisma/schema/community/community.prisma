@@ -12,6 +12,7 @@ model Community {
   updatedAt   DateTime            @updatedAt
 
   members CommunityMember[]
+  events  Event[]
 }
 
 enum CommunityCategory {

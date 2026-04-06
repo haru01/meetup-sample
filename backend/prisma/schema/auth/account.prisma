@@ -10,4 +10,5 @@ model Account {
   createdAt    DateTime @default(now())
 
   members CommunityMember[]
+  events  Event[]
 }

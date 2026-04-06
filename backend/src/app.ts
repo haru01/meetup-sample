@@ -9,12 +9,14 @@ import { prisma as defaultPrisma } from './infrastructure/prisma';
 import { createAuthRouter } from './auth/controllers/auth.controller';
 import { createCommunityRouter } from './community/controllers/community.controller';
 import { createMemberRouter } from './community/controllers/member.controller';
+import { createEventRouter } from './community/controllers/event.controller';
 import { createAuthDependencies } from './auth/composition';
 import { createCommunityDependencies } from './community/composition';
 // OpenAPI定義を登録（side-effect import）
 import './auth/controllers/auth-openapi';
 import './community/controllers/community-openapi';
 import './community/controllers/member-openapi';
+import './community/controllers/event-openapi';
 
 // ============================================================
 // Express Application Factory
@@ -60,6 +62,9 @@ export function createApp(prismaClient: PrismaClient = defaultPrisma): Applicati
 
   // Member routes (nested under communities)
   application.use('/communities/:id/members', createMemberRouter(communityDeps.member));
+
+  // Event routes (nested under communities)
+  application.use('/communities/:id/events', createEventRouter(communityDeps.event));
 
   // Error handler (MUST be last)
   application.use(errorHandlerMiddleware);

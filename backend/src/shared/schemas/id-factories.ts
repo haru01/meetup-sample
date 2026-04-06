@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AccountId, CommunityId, CommunityMemberId } from './common.js';
+import type { AccountId, CommunityId, CommunityMemberId, EventId } from './common.js';
 
 // ============================================================
 // AccountId Factories
@@ -41,4 +41,18 @@ export function createCommunityId(id?: string): CommunityId {
  */
 export function createCommunityMemberId(id?: string): CommunityMemberId {
   return (id ?? randomUUID()) as CommunityMemberId;
+}
+
+// ============================================================
+// EventId Factories
+// ============================================================
+
+/**
+ * EventIdを生成する
+ *
+ * @param id 指定した場合はその文字列をEventIdとして使用する。省略時はランダムUUIDを生成する。
+ * @returns EventId
+ */
+export function createEventId(id?: string): EventId {
+  return (id ?? randomUUID()) as EventId;
 }

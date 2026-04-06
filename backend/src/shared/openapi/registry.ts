@@ -49,6 +49,7 @@ export function generateOpenAPIDocument(): OpenAPIObject {
       { name: 'Auth', description: 'Authentication' },
       { name: 'Communities', description: 'Community management' },
       { name: 'Members', description: 'Community member management' },
+      { name: 'Events', description: 'Event management' },
       { name: 'System', description: 'System' },
     ],
   });
