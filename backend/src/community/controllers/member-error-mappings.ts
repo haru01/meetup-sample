@@ -88,14 +88,6 @@ export function mapApproveMemberErrorToResponse(error: ApproveMemberError): Erro
           message: 'メンバーが見つかりません',
         },
       };
-    case 'NotAuthorized':
-      return {
-        status: 403,
-        response: {
-          code: 'NOT_AUTHORIZED',
-          message: 'この操作を行う権限がありません',
-        },
-      };
     case 'MemberAlreadyActive':
       return {
         status: 422,
@@ -126,14 +118,6 @@ export function mapRejectMemberErrorToResponse(error: RejectMemberError): ErrorR
         response: {
           code: 'MEMBER_NOT_FOUND',
           message: 'メンバーが見つかりません',
-        },
-      };
-    case 'NotAuthorized':
-      return {
-        status: 403,
-        response: {
-          code: 'NOT_AUTHORIZED',
-          message: 'この操作を行う権限がありません',
         },
       };
   }

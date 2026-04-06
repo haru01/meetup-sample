@@ -22,27 +22,8 @@ const community: Community = {
   updatedAt: new Date('2026-01-01T00:00:00Z'),
 };
 
-const ownerAccountId = createAccountId('owner-account-1');
 const targetAccountId = createAccountId('target-account-1');
 const targetMemberId = createCommunityMemberId('target-member-1');
-
-const ownerMember: CommunityMember = {
-  id: createCommunityMemberId('owner-member-1'),
-  communityId: community.id,
-  accountId: ownerAccountId,
-  role: 'OWNER',
-  status: 'ACTIVE',
-  createdAt: new Date('2026-01-01T00:00:00Z'),
-};
-
-const adminMember: CommunityMember = {
-  id: createCommunityMemberId('admin-member-1'),
-  communityId: community.id,
-  accountId: createAccountId('admin-account-1'),
-  role: 'ADMIN',
-  status: 'ACTIVE',
-  createdAt: new Date('2026-01-01T00:00:00Z'),
-};
 
 const pendingMember: CommunityMember = {
   id: targetMemberId,
@@ -62,15 +43,6 @@ const activeMember: CommunityMember = {
   createdAt: new Date('2026-01-01T00:00:00Z'),
 };
 
-const regularMember: CommunityMember = {
-  id: createCommunityMemberId('regular-member-1'),
-  communityId: community.id,
-  accountId: createAccountId('regular-account-1'),
-  role: 'MEMBER',
-  status: 'ACTIVE',
-  createdAt: new Date('2026-01-01T00:00:00Z'),
-};
-
 const makeCommunityRepository = (): CommunityRepository => ({
   findById: vi.fn().mockResolvedValue(community),
   findByName: vi.fn().mockResolvedValue(null),
@@ -80,7 +52,7 @@ const makeCommunityRepository = (): CommunityRepository => ({
 });
 
 const makeMemberRepository = (): CommunityMemberRepository => ({
-  findByIds: vi.fn().mockResolvedValue(ownerMember),
+  findByIds: vi.fn().mockResolvedValue(null),
   findById: vi.fn().mockResolvedValue(pendingMember),
   save: vi.fn().mockResolvedValue(undefined),
   delete: vi.fn().mockResolvedValue(undefined),
@@ -103,10 +75,9 @@ describe('ApproveMemberCommand', () => {
   });
 
   describe('正常系', () => {
-    it('OWNERがPENDINGメンバーを承認するとACTIVEになる', async () => {
+    it('PENDINGメンバーを承認するとACTIVEになる', async () => {
       const result = await useCase.execute({
         communityId: community.id,
-        requesterAccountId: ownerAccountId,
         targetMemberId,
       });
 
@@ -116,22 +87,9 @@ describe('ApproveMemberCommand', () => {
       }
     });
 
-    it('ADMINがPENDINGメンバーを承認できる', async () => {
-      vi.mocked(memberRepo.findByIds).mockResolvedValue(adminMember);
-
-      const result = await useCase.execute({
-        communityId: community.id,
-        requesterAccountId: adminMember.accountId,
-        targetMemberId,
-      });
-
-      expect(result.ok).toBe(true);
-    });
-
     it('承認したメンバーをリポジトリに保存する', async () => {
       await useCase.execute({
         communityId: community.id,
-        requesterAccountId: ownerAccountId,
         targetMemberId,
       });
 
@@ -145,7 +103,6 @@ describe('ApproveMemberCommand', () => {
 
       const result = await useCase.execute({
         communityId: createCommunityId('non-existent'),
-        requesterAccountId: ownerAccountId,
         targetMemberId,
       });
 
@@ -155,42 +112,11 @@ describe('ApproveMemberCommand', () => {
       }
     });
 
-    it('リクエスターがメンバーでない場合はNotAuthorizedエラーを返す', async () => {
-      vi.mocked(memberRepo.findByIds).mockResolvedValue(null);
-
-      const result = await useCase.execute({
-        communityId: community.id,
-        requesterAccountId: createAccountId('non-member'),
-        targetMemberId,
-      });
-
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.type).toBe('NotAuthorized');
-      }
-    });
-
-    it('MEMBERロールはNotAuthorizedエラーを返す', async () => {
-      vi.mocked(memberRepo.findByIds).mockResolvedValue(regularMember);
-
-      const result = await useCase.execute({
-        communityId: community.id,
-        requesterAccountId: regularMember.accountId,
-        targetMemberId,
-      });
-
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.type).toBe('NotAuthorized');
-      }
-    });
-
     it('対象メンバーが存在しない場合はMemberNotFoundエラーを返す', async () => {
       vi.mocked(memberRepo.findById).mockResolvedValue(null);
 
       const result = await useCase.execute({
         communityId: community.id,
-        requesterAccountId: ownerAccountId,
         targetMemberId: createCommunityMemberId('non-existent'),
       });
 
@@ -205,7 +131,6 @@ describe('ApproveMemberCommand', () => {
 
       const result = await useCase.execute({
         communityId: community.id,
-        requesterAccountId: ownerAccountId,
         targetMemberId,
       });
 
