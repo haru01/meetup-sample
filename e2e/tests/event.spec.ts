@@ -32,7 +32,7 @@ async function createCommunity(page: Page, suffix: string): Promise<string> {
 
 async function logout(page: Page) {
   await page.getByRole("button", { name: "ログアウト" }).click();
-  await expect(page).toHaveURL("/login");
+  await expect(page.getByRole("link", { name: "ログイン" })).toBeVisible();
 }
 
 test.describe("イベント", () => {

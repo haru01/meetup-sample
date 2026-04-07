@@ -31,6 +31,7 @@ npm run test:ui   # Playwright UI モードで実行
 | `auth.spec.ts` | auth | 新規登録、ログイン、ログイン失敗、ログアウト |
 | `community.spec.ts` | meetup | コミュニティ作成、詳細表示、カテゴリフィルター |
 | `member.spec.ts` | meetup | コミュニティ参加、コミュニティ退会 |
+| `event.spec.ts` | meetup | イベント作成、権限チェック |
 
 ## パターン
 
